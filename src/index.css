@@ -27,6 +27,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-main);
   background: radial-gradient(circle at top right, #e2e8f0, #f8fafc 50%);
@@ -34,6 +38,7 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -43,12 +48,18 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.02em;
 }
 
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 .app-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
+/* ===== NAVBAR ===== */
 .navbar {
   background: var(--glass);
   backdrop-filter: blur(12px);
@@ -64,23 +75,84 @@ h1, h2, h3, h4, h5, h6 {
   transition: all 0.3s ease;
 }
 
-.logo {
-  font-family: var(--font-heading);
-  font-size: 1.8rem;
-  font-weight: 900;
+.nav-links {
+  display: flex;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.nav-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-left: 1rem;
+}
+
+/* Hamburger */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0.4rem;
+}
+
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* Mobile Drawer */
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.98);
+  z-index: 999;
+  flex-direction: column;
+  padding: 5rem 2rem 2rem;
+  gap: 2rem;
+  backdrop-filter: blur(12px);
+}
+
+.mobile-menu.open {
+  display: flex;
+}
+
+.mobile-menu a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.4rem;
+  font-weight: 700;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.mobile-menu-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.6rem;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  justify-content: center;
 }
 
-.main-content {
-  flex: 1;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 3rem 5%;
-  width: 100%;
-}
-
+/* ===== HERO ===== */
 .hero {
   text-align: center;
   padding: 8rem 2rem;
@@ -106,7 +178,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .hero h1 {
   color: white;
-  font-size: 4.5rem;
+  font-size: clamp(2.2rem, 5vw, 4.5rem);
   margin-bottom: 1.5rem;
   position: relative;
   z-index: 1;
@@ -114,7 +186,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .hero p {
-  font-size: 1.4rem;
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
   opacity: 0.8;
   max-width: 800px;
   margin: 0 auto 3rem;
@@ -122,9 +194,19 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 1;
 }
 
+.hero-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== CARDS ===== */
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: 2.5rem;
 }
 
@@ -144,6 +226,7 @@ h1, h2, h3, h4, h5, h6 {
   border-color: var(--primary-accent);
 }
 
+/* ===== BUTTONS ===== */
 .btn {
   padding: 1rem 2rem;
   border-radius: 50px;
@@ -158,6 +241,8 @@ h1, h2, h3, h4, h5, h6 {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 0.9rem;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .btn-primary {
@@ -172,6 +257,7 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 15px 25px -5px rgba(59, 130, 246, 0.5);
 }
 
+/* ===== GLASS CARD ===== */
 .glass-card {
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(20px);
@@ -179,9 +265,10 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: var(--radius);
 }
 
+/* ===== SECTION TITLE ===== */
 .section-title {
   text-align: center;
-  font-size: 3rem;
+  font-size: clamp(1.8rem, 4vw, 3rem);
   margin-bottom: 4rem;
   position: relative;
 }
@@ -198,30 +285,168 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 3px;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
+/* ===== MAIN CONTENT ===== */
+.main-content {
+  flex: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 3rem 5%;
+  width: 100%;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
+/* ===== FOOTER ===== */
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr;
+  gap: 5rem;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 5px;
+/* ===== MYTH/FACT CARDS ===== */
+.fact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
+  gap: 3rem;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
+/* ========================================
+   RESPONSIVE BREAKPOINTS
+======================================== */
+
+/* Tablet — ≤ 1024px */
 @media (max-width: 1024px) {
-  .hero h1 { font-size: 3.5rem; }
+  .nav-links {
+    gap: 1.5rem;
+  }
+
+  .hero {
+    padding: 6rem 2rem;
+    border-radius: 28px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.8rem;
+  }
 }
 
+/* Mobile — ≤ 768px */
 @media (max-width: 768px) {
-  .hero h1 { font-size: 2.5rem; }
-  .hero p { font-size: 1.1rem; }
-  .section-title { font-size: 2.2rem; }
+  /* Navbar: hide desktop links, show hamburger */
+  .nav-links,
+  .nav-actions {
+    display: none;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .navbar {
+    padding: 0.8rem 5%;
+  }
+
+  /* Hero */
+  .hero {
+    padding: 4rem 1.5rem;
+    border-radius: 20px;
+    margin-bottom: 3rem;
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .hero-buttons .btn {
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+  }
+
+  /* Cards */
+  .card-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .card {
+    padding: 1.8rem;
+  }
+
+  /* Main content */
+  .main-content {
+    padding: 2rem 1.2rem;
+  }
+
+  /* Section title */
+  .section-title {
+    font-size: 1.8rem;
+    margin-bottom: 2.5rem;
+  }
+
+  /* Footer */
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  /* Fact/myth cards */
+  .fact-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  /* Generic inline-flex row that overflows */
+  .btn {
+    font-size: 0.8rem;
+    padding: 0.8rem 1.4rem;
+  }
+}
+
+/* Small phones — ≤ 480px */
+@media (max-width: 480px) {
+  .hero {
+    padding: 3rem 1rem;
+    border-radius: 16px;
+  }
+
+  .hero h1 {
+    font-size: 1.9rem;
+  }
+
+  .hero p {
+    font-size: 0.95rem;
+  }
+
+  .card {
+    padding: 1.4rem;
+  }
+
+  .main-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* ===== FULLCHATBOT responsive ===== */
+@media (max-width: 768px) {
+  /* The sidebar in FullChatbot is hidden by default on mobile */
+  .chatbot-sidebar {
+    display: none !important;
+  }
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { 
   Send, Bot, User, Loader2, Sparkles, Languages, Trash2, 
   Copy, Volume2, VolumeX, History, Plus, MessageSquare, 
@@ -21,7 +22,7 @@ const FullChatbot = () => {
   const [isListening, setIsListening] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showLanguages, setShowLanguages] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(typeof window !== 'undefined' ? window.innerWidth > 768 : true);
   const [user, setUser] = useState(null);
   const [activeAssistant, setActiveAssistant] = useState('default');
   const messagesEndRef = useRef(null);
@@ -229,17 +230,20 @@ const FullChatbot = () => {
   );
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#0f172a', color: '#f8fafc', overflow: 'hidden', fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}>
+    <div style={{ display: 'flex', height: '100dvh', background: '#0f172a', color: '#f8fafc', overflow: 'hidden', fontFamily: 'Inter, system-ui, -apple-system, sans-serif', position: 'relative' }}>
       {/* Sidebar - VoteWise Branded Slate */}
       <AnimatePresence mode="wait">
         {isSidebarOpen && (
           <motion.div 
             initial={{ width: 0, opacity: 0 }}
-            animate={{ width: '260px', opacity: 1 }}
+            animate={{ width: 'min(260px, 80vw)', opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             style={{ 
               background: '#020617', display: 'flex', flexDirection: 'column',
-              height: '100%', borderRight: '1px solid #1e293b', overflow: 'hidden'
+              height: '100%', borderRight: '1px solid #1e293b', overflow: 'hidden',
+              position: typeof window !== 'undefined' && window.innerWidth <= 768 ? 'absolute' : 'relative',
+              zIndex: typeof window !== 'undefined' && window.innerWidth <= 768 ? 100 : 'auto',
+              top: 0, left: 0, bottom: 0
             }}
           >
             <div style={{ padding: '1.2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -531,7 +535,32 @@ const FullChatbot = () => {
                     <div style={{ fontWeight: 800, marginBottom: '0.4rem', fontSize: '0.85rem', color: msg.role === 'user' ? '#94a3b8' : 'var(--primary-accent)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       {msg.role === 'user' ? 'Citizen Request' : 'VoteWise Intelligence'}
                     </div>
-                    <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: '#f1f5f9', whiteSpace: 'pre-wrap', fontWeight: 500 }}>{msg.text}</div>
+                    {msg.role === 'user' ? (
+                      <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: '#f1f5f9', whiteSpace: 'pre-wrap', fontWeight: 500 }}>{msg.text}</div>
+                    ) : (
+                      <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: '#f1f5f9', fontWeight: 500 }} className="markdown-body">
+                        <ReactMarkdown
+                          components={{
+                            p: ({node, ...props}) => <p style={{ margin: '0.4rem 0' }} {...props} />,
+                            strong: ({node, ...props}) => <strong style={{ color: '#93c5fd', fontWeight: 700 }} {...props} />,
+                            em: ({node, ...props}) => <em style={{ color: '#c4b5fd' }} {...props} />,
+                            ul: ({node, ...props}) => <ul style={{ paddingLeft: '1.4rem', margin: '0.5rem 0' }} {...props} />,
+                            ol: ({node, ...props}) => <ol style={{ paddingLeft: '1.4rem', margin: '0.5rem 0' }} {...props} />,
+                            li: ({node, ...props}) => <li style={{ marginBottom: '0.25rem' }} {...props} />,
+                            h1: ({node, ...props}) => <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#e2e8f0', margin: '0.8rem 0 0.4rem' }} {...props} />,
+                            h2: ({node, ...props}) => <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#e2e8f0', margin: '0.7rem 0 0.35rem' }} {...props} />,
+                            h3: ({node, ...props}) => <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#cbd5e1', margin: '0.6rem 0 0.3rem' }} {...props} />,
+                            a: ({node, ...props}) => <a style={{ color: '#60a5fa', textDecoration: 'underline' }} target="_blank" rel="noreferrer" {...props} />,
+                            code: ({node, inline, ...props}) => inline 
+                              ? <code style={{ background: '#1e293b', padding: '0.15rem 0.4rem', borderRadius: '4px', fontSize: '0.9em', color: '#f472b6' }} {...props} />
+                              : <pre style={{ background: '#1e293b', padding: '1rem', borderRadius: '8px', overflowX: 'auto', margin: '0.5rem 0' }}><code style={{ color: '#e2e8f0', fontSize: '0.9rem' }} {...props} /></pre>,
+                            blockquote: ({node, ...props}) => <blockquote style={{ borderLeft: '3px solid #3b82f6', paddingLeft: '0.8rem', margin: '0.5rem 0', color: '#94a3b8' }} {...props} />,
+                          }}
+                        >
+                          {msg.text}
+                        </ReactMarkdown>
+                      </div>
+                    )}
                     
                     {msg.role === 'bot' && (
                       <div style={{ display: 'flex', gap: '1.2rem', marginTop: '1.2rem' }}>
@@ -563,7 +592,7 @@ const FullChatbot = () => {
         </div>
 
         {/* Input Footer Area - VoteWise Pill Style */}
-        <div style={{ width: '100%', maxWidth: '850px', margin: '0 auto', padding: '0 1.5rem 2.5rem' }}>
+        <div style={{ width: '100%', maxWidth: '850px', margin: '0 auto', padding: '0 clamp(0.8rem,3vw,1.5rem) clamp(1rem,3vw,2.5rem)' }}>
           <div style={{ 
             background: '#1e293b', borderRadius: '24px', padding: '0.6rem 1.2rem',
             display: 'flex', alignItems: 'center', gap: '1rem',
@@ -580,8 +609,8 @@ const FullChatbot = () => {
                 placeholder={loading ? t.analyzeData : t.askAnything}
                 style={{
                   flex: 1, padding: '0.8rem 0', background: 'transparent', border: 'none', outline: 'none',
-                  fontSize: '1.1rem', color: 'white', resize: 'none', height: '48px', fontFamily: 'inherit',
-                  fontWeight: 500
+                  fontSize: 'clamp(0.95rem,2.5vw,1.1rem)', color: 'white', resize: 'none', height: '48px', fontFamily: 'inherit',
+                  fontWeight: 500, minWidth: 0
                 }}
             />
 
