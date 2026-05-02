@@ -4,15 +4,18 @@ import { getFirestore } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 import { getMessaging } from "firebase/messaging";
 
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBTKsomUZfER3ufKuIjP5dDAkRbbMY-1oA",
-  authDomain: "studio-1442930565-b00ef.firebaseapp.com",
-  projectId: "studio-1442930565-b00ef",
-  storageBucket: "studio-1442930565-b00ef.firebasestorage.app",
-  messagingSenderId: "670785176878",
-  appId: "1:670785176878:web:f54a74177a4a20c32d66bf"
+  apiKey: "AIzaSyCAg-qTRNYiUvDMHU6aEEmtUoodNE3l4yA",
+  authDomain: "votewise-india-b5e0c.firebaseapp.com",
+  projectId: "votewise-india-b5e0c",
+  storageBucket: "votewise-india-b5e0c.firebasestorage.app",
+  messagingSenderId: "1014340596395",
+  appId: "1:1014340596395:web:5cfd34ef480a3b783d3dee",
+  measurementId: "G-N6QPYNGXCL"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
