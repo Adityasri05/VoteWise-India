@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Vote, UserCheck, MapPin, MessageSquare, ShieldCheck, Trophy, Info, ChevronRight, CheckCircle2, AlertTriangle, HelpCircle, Star, Award, LayoutDashboard, LogIn, User, Sparkles, Fingerprint, Globe, Bell, Languages, X, Menu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Timeline from './components/Timeline';
-import BoothLocator from './components/BoothLocator';
-import CandidateAwareness from './components/CandidateAwareness';
-import VoterProcess from './components/VoterProcess';
-import Quiz from './components/Quiz';
-import AdminDashboard from './components/AdminDashboard';
-import HelpCenter from './components/HelpCenter';
-import FullChatbot from './components/FullChatbot';
 import AuthModal from './components/AuthModal';
 import { auth } from './firebase';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { useLanguage } from './context/LanguageContext';
 
-import Home from './components/Home';
+const Home = lazy(() => import('./components/Home'));
+const BoothLocator = lazy(() => import('./components/BoothLocator'));
+const CandidateAwareness = lazy(() => import('./components/CandidateAwareness'));
+const VoterProcess = lazy(() => import('./components/VoterProcess'));
+const Quiz = lazy(() => import('./components/Quiz'));
+const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
+const HelpCenter = lazy(() => import('./components/HelpCenter'));
+const FullChatbot = lazy(() => import('./components/FullChatbot'));
 
 function App() {
   const location = useLocation();
@@ -175,16 +174,18 @@ function App() {
 
       <div className="app-main-content">
         <AnimatePresence mode="wait">
-          <Routes location={location} key={location.pathname}>
-            <Route path="/" element={<Home />} />
-            <Route path="/process" element={<VoterProcess />} />
-            <Route path="/booth" element={<BoothLocator />} />
-            <Route path="/candidates" element={<CandidateAwareness />} />
-            <Route path="/quiz" element={<Quiz />} />
-            <Route path="/help" element={<HelpCenter />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/ai-assistant" element={<FullChatbot />} />
-          </Routes>
+          <Suspense fallback={<div className="loading-spinner">Loading...</div>}>
+            <Routes location={location} key={location.pathname}>
+              <Route path="/" element={<Home />} />
+              <Route path="/process" element={<VoterProcess />} />
+              <Route path="/booth" element={<BoothLocator />} />
+              <Route path="/candidates" element={<CandidateAwareness />} />
+              <Route path="/quiz" element={<Quiz />} />
+              <Route path="/help" element={<HelpCenter />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/ai-assistant" element={<FullChatbot />} />
+            </Routes>
+          </Suspense>
         </AnimatePresence>
       </div>
 
