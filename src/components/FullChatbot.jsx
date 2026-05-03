@@ -13,6 +13,23 @@ import { useLanguage } from '../context/LanguageContext';
 import { auth } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
+// Simple Error Boundary for Markdown rendering
+class MarkdownErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+  render() {
+    if (this.state.hasError) {
+      return <div className="markdown-fallback">{this.props.content}</div>;
+    }
+    return this.props.children;
+  }
+}
+
 const FullChatbot = () => {
   const navigate = useNavigate();
   const { language, setLanguage, t, languages } = useLanguage();
@@ -56,10 +73,21 @@ const FullChatbot = () => {
   };
 
   useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 768) {
+        setIsSidebarOpen(false);
+      } else {
+        setIsSidebarOpen(true);
+      }
+    };
+    window.addEventListener('resize', handleResize);
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
-    return () => unsubscribe();
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      unsubscribe();
+    };
   }, []);
 
   // languages removed (now from context)
@@ -230,39 +258,34 @@ const FullChatbot = () => {
   );
 
   return (
-    <div style={{ display: 'flex', height: '100dvh', background: '#0f172a', color: '#f8fafc', overflow: 'hidden', fontFamily: 'Inter, system-ui, -apple-system, sans-serif', position: 'relative' }}>
+    <div className="full-chat-container">
       {/* Sidebar - VoteWise Branded Slate */}
       <AnimatePresence mode="wait">
         {isSidebarOpen && (
           <motion.div 
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 'min(260px, 80vw)', opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
-            style={{ 
-              background: '#020617', display: 'flex', flexDirection: 'column',
-              height: '100%', borderRight: '1px solid #1e293b', overflow: 'hidden',
-              position: typeof window !== 'undefined' && window.innerWidth <= 768 ? 'absolute' : 'relative',
-              zIndex: typeof window !== 'undefined' && window.innerWidth <= 768 ? 100 : 'auto',
-              top: 0, left: 0, bottom: 0
-            }}
+            initial={{ x: -300, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -300, opacity: 0 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className={`full-chat-sidebar ${window.innerWidth <= 768 ? 'mobile' : ''}`}
           >
-            <div style={{ padding: '1.2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'var(--primary-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(59, 130, 246, 0.4)' }}>
+            <div className="sidebar-brand">
+              <div className="brand-logo-container">
+                <div className="brand-icon-box">
                   <Sparkles size={16} color="white" />
                 </div>
-                <span style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.02em' }}>VoteWise</span>
+                <span className="brand-name">VoteWise</span>
               </div>
               <motion.div 
                 whileHover={{ background: '#1e293b' }} 
                 onClick={() => setIsSidebarOpen(false)}
-                style={{ padding: '0.5rem', borderRadius: '8px', cursor: 'pointer' }}
+                className="sidebar-close-btn"
               >
                 <PanelLeftClose size={20} color="#94a3b8" />
               </motion.div>
             </div>
 
-            <div style={{ padding: '0 0.8rem' }}>
+            <div className="sidebar-content">
               <motion.button 
                 whileHover={{ background: '#1e293b', scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -270,102 +293,80 @@ const FullChatbot = () => {
                   setMessages([]);
                   setShowLanguages(false);
                 }}
-                style={{ 
-                  width: '100%', padding: '0.8rem 1rem', borderRadius: '12px', 
-                  background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  fontWeight: 700, cursor: 'pointer', marginBottom: '1.5rem', fontSize: '0.9rem'
-                }}
+                className="new-chat-btn"
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                <div className="new-chat-btn-inner">
                   <Plus size={18} /> <span>New Journey</span>
                 </div>
-                <div style={{ background: 'rgba(59, 130, 246, 0.2)', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.65rem' }}>AI</div>
+                <div className="ai-tag-badge">AI</div>
               </motion.button>
               
-              <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
+              <div className="search-box-wrapper">
                 <input 
                   type="text"
                   placeholder="Search history..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{ 
-                    width: '100%', padding: '0.6rem 1rem 0.6rem 2.2rem', borderRadius: '10px',
-                    background: '#1e293b', border: '1px solid #334155', color: 'white',
-                    fontSize: '0.85rem', outline: 'none'
-                  }}
+                  className="search-input-field"
                 />
-                <Search size={14} color="#64748b" style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)' }} />
+                <Search size={14} color="#64748b" className="search-input-icon" />
               </div>
             </div>
 
-            <div style={{ flex: 1, overflowY: 'auto', padding: '2rem 0.8rem 1rem' }}>
-              <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#475569', padding: '0 1rem', marginBottom: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI Assistants</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            <div className="sidebar-scroll-area">
+              <div className="assistant-modes-container">
                 {Object.entries(assistantModes).map(([mode, data]) => (
                   <motion.div 
                     key={mode}
                     whileHover={{ background: '#1e293b' }} 
                     onClick={() => switchAssistant(mode)}
+                    className={`assistant-mode-item ${activeAssistant === mode ? 'active' : ''}`}
                     style={{ 
-                      display: 'flex', alignItems: 'center', gap: '0.8rem', 
-                      padding: '0.7rem 1rem', borderRadius: '8px', cursor: 'pointer',
-                      background: activeAssistant === mode ? `${data.color}15` : 'transparent',
-                      border: activeAssistant === mode ? `1px solid ${data.color}40` : '1px solid transparent',
-                      transition: 'all 0.2s ease'
+                      '--mode-color': data.color,
+                      '--mode-bg': `${data.color}15`,
+                      '--mode-border': `${data.color}40`,
                     }}
                   >
-                    <div style={{ 
-                      width: '24px', height: '24px', borderRadius: '6px', 
-                      background: data.color, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      boxShadow: activeAssistant === mode ? `0 0 12px ${data.color}60` : 'none'
-                    }}>
+                    <div className="mode-icon-box">
                       {data.icon}
                     </div>
-                    <span style={{ 
-                      fontSize: '0.9rem', fontWeight: activeAssistant === mode ? 700 : 600,
-                      color: activeAssistant === mode ? data.color : '#f8fafc'
-                    }}>
+                    <span className="assistant-mode-label">
                       {data.label}
                     </span>
                     {activeAssistant === mode && (
-                      <div style={{ marginLeft: 'auto', width: '6px', height: '6px', borderRadius: '50%', background: data.color, boxShadow: `0 0 8px ${data.color}` }} />
+                      <div className="active-mode-dot" />
                     )}
                   </motion.div>
                 ))}
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1rem', marginTop: '2.5rem', marginBottom: '0.8rem' }}>
-                <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your Recents</div>
+              <div className="history-header-box">
+                <div className="sidebar-section-title no-padding">Your Recents</div>
                 {chatHistory.length > 0 && (
                   <motion.button 
                     whileHover={{ color: '#ef4444' }}
                     onClick={(e) => clearHistory(e)}
-                    style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.65rem', fontWeight: 700 }}
+                    className="clear-history-btn"
                   >
                     <Trash2 size={12} /> Clear
                   </motion.button>
                 )}
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+              <div className="history-list">
                 {filteredHistory.map((item) => (
                   <motion.div 
                     key={item.id}
                     whileHover={{ background: '#1e293b', x: 5 }}
                     onClick={() => handleSend(item.title)}
-                    style={{ 
-                      padding: '0.7rem 1rem', borderRadius: '8px', cursor: 'pointer',
-                      fontSize: '0.9rem', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      transition: 'all 0.2s'
-                    }}
+                    className="history-item-row"
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <div className="history-item-content">
                       <MessageSquare size={14} /> {item.title}
                     </div>
                     <motion.div 
                       onClick={(e) => deleteHistoryItem(e, item.id)}
                       whileHover={{ color: '#ef4444', scale: 1.2 }}
-                      style={{ color: '#475569', padding: '0.2rem' }}
+                      className="delete-history-btn"
                     >
                       <Trash2 size={12} />
                     </motion.div>
@@ -374,24 +375,24 @@ const FullChatbot = () => {
               </div>
             </div>
 
-            <div style={{ padding: '1rem', borderTop: '1px solid #1e293b', background: '#020617' }}>
+            <div className="sidebar-footer">
               <motion.div 
                 whileHover={{ background: '#1e293b' }}
                 onClick={() => !user && navigate('/')}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.8rem', padding: '0.6rem', borderRadius: '12px', cursor: 'pointer' }}
+                className="user-profile-bar"
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                <div className="user-profile-info">
                   {user ? (
-                    <img src={user.photoURL} alt={user.displayName} style={{ width: '36px', height: '36px', borderRadius: '10px', border: '2px solid var(--primary-accent)' }} />
+                    <img src={user.photoURL} alt={user.displayName} className="user-avatar-small" />
                   ) : (
-                    <div style={{ width: '36px', height: '36px', background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', fontWeight: 800, color: 'white' }}>?</div>
+                    <div className="user-avatar-placeholder-small">?</div>
                   )}
-                  <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>{user ? user.displayName.split(' ')[0] : 'Guest'}</div>
-                    <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{user ? 'Verified Citizen' : 'Not Logged In'}</div>
+                  <div className="user-profile-text-content">
+                    <div className="user-profile-name">{user ? user.displayName.split(' ')[0] : 'Guest'}</div>
+                    <div className="user-profile-status">{user ? 'Verified Citizen' : 'Not Logged In'}</div>
                   </div>
                 </div>
-                <div style={{ background: user ? '#22c55e' : '#64748b', width: '8px', height: '8px', borderRadius: '50%', boxShadow: user ? '0 0 10px #22c55e' : 'none' }}></div>
+                <div className={`status-dot ${user ? 'online' : 'offline'}`}></div>
               </motion.div>
             </div>
           </motion.div>
@@ -399,48 +400,44 @@ const FullChatbot = () => {
       </AnimatePresence>
 
       {/* Main Chat Area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', background: '#0f172a' }}>
+      <div className="full-chat-main">
         {/* Chat Header */}
-        <div style={{ 
-          padding: '1rem 2rem', background: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(12px)',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          zIndex: 10, borderBottom: '1px solid #1e293b'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer' }}>
+        <div className="chat-view-header">
+          <div className="header-logo-container">
             {!isSidebarOpen && (
               <motion.div 
                 whileHover={{ background: '#1e293b' }} 
                 onClick={() => setIsSidebarOpen(true)}
-                style={{ padding: '0.5rem', borderRadius: '8px', cursor: 'pointer', marginRight: '0.5rem' }}
+                className="sidebar-toggle-btn"
               >
                 <PanelLeftOpen size={20} color="#94a3b8" />
               </motion.div>
             )}
             <div 
               onClick={() => navigate('/')}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}
+              className="header-logo-container"
             >
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--primary-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className="header-logo-icon">
                 <Sparkles size={20} color="white" />
               </div>
-              <span style={{ fontWeight: 800, fontSize: '1.2rem', letterSpacing: '-0.02em' }}>VoteWise AI <span style={{ color: 'var(--primary-accent)', fontSize: '0.8rem', background: 'rgba(59, 130, 246, 0.1)', padding: '0.2rem 0.5rem', borderRadius: '6px', marginLeft: '0.5rem' }}>Beta</span></span>
+              <span className="header-logo-text">VoteWise AI <span className="beta-tag">Beta</span></span>
             </div>
           </div>
           
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div className="header-actions">
             <motion.button 
               whileHover={{ scale: 1.05, background: 'var(--primary-accent)' }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/')}
-              style={{ padding: '0.5rem 1.2rem', borderRadius: '12px', border: 'none', background: 'var(--primary)', color: 'white', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)' }}
+              className="hub-btn"
             >
               <Trophy size={14} /> {t.dashboard || 'Election Hub'}
             </motion.button>
-            <div style={{ position: 'relative' }}>
+            <div className="lang-picker-wrapper">
               <motion.div 
                 whileHover={{ background: '#1e293b' }}
                 onClick={() => setShowLanguages(!showLanguages)}
-                style={{ width: '36px', height: '36px', borderRadius: '12px', border: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: showLanguages ? '#1e293b' : 'transparent' }}
+                className={`lang-trigger ${showLanguages ? 'active' : ''}`}
               >
                 <Languages size={18} color={showLanguages ? 'var(--primary-accent)' : '#94a3b8'} />
               </motion.div>
@@ -451,28 +448,18 @@ const FullChatbot = () => {
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    style={{ 
-                      position: 'absolute', top: '120%', right: 0, width: '200px',
-                      background: '#020617', border: '1px solid #1e293b', borderRadius: '16px',
-                      padding: '0.8rem', boxShadow: '0 20px 40px rgba(0,0,0,0.4)', zIndex: 100
-                    }}
+                    className="lang-dropdown-full"
                   >
-                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#475569', marginBottom: '0.5rem', padding: '0 0.5rem', textTransform: 'uppercase' }}>Select Language</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.2rem', maxHeight: '300px', overflowY: 'auto' }}>
+                    <div className="dropdown-label">Select Language</div>
+                    <div className="lang-grid">
                       {languages.map((l) => (
                         <motion.div
                           key={l.name}
                           whileHover={{ background: '#1e293b', x: 5 }}
+                          className={`lang-option ${language === l.name ? 'active' : ''}`}
                           onClick={() => {
                             setLanguage(l.name);
                             setShowLanguages(false);
-                          }}
-                          style={{ 
-                            padding: '0.6rem 0.8rem', borderRadius: '8px', cursor: 'pointer',
-                            fontSize: '0.9rem', color: language === l.name ? 'var(--primary-accent)' : '#94a3b8',
-                            background: language === l.name ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-                            fontWeight: language === l.name ? 700 : 500,
-                            display: 'flex', alignItems: 'center', justifyContent: 'space-between'
                           }}
                         >
                           {l.name}
@@ -488,26 +475,26 @@ const FullChatbot = () => {
         </div>
 
         {/* Messages Container or Empty State */}
-        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+        <div className="chat-scroll-container">
           {messages.length === 0 ? (
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingBottom: '15vh' }}>
+            <div className="empty-chat-placeholder">
               <motion.div 
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                style={{ width: '80px', height: '80px', borderRadius: '24px', background: 'var(--primary-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '2rem', boxShadow: '0 20px 40px rgba(59, 130, 246, 0.3)' }}
+                className="placeholder-icon"
               >
                 <Sparkles size={40} color="white" />
               </motion.div>
-              <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1.5rem', color: 'white', textAlign: 'center', letterSpacing: '-0.03em' }}>
+              <h1 className="placeholder-title">
                 {t.botWelcomeTitle}
               </h1>
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', maxWidth: '600px' }}>
+              <div className="suggestion-buttons-grid">
                 {initialSuggestions.map((s, idx) => (
                   <motion.button
                     key={idx}
                     whileHover={{ y: -5, background: '#1e293b' }}
                     onClick={() => handleSuggestion(s)}
-                    style={{ padding: '0.8rem 1.5rem', borderRadius: '16px', background: '#020617', border: '1px solid #1e293b', color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.6rem' }}
+                    className="suggestion-btn"
                   >
                     {s.icon} {s.label}
                   </motion.button>
@@ -515,59 +502,39 @@ const FullChatbot = () => {
               </div>
             </div>
           ) : (
-            <div style={{ width: '100%', maxWidth: '850px', margin: '0 auto', padding: '3rem 1.5rem' }}>
+            <div className="chat-message-list">
               {messages.map((msg, i) => (
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   key={i} 
-                  style={{ marginBottom: '2.5rem', display: 'flex', gap: '1.8rem' }}
+                  className="message-row"
                 >
-                  <div style={{ 
-                    width: '36px', height: '36px', borderRadius: '10px', flexShrink: 0, 
-                    background: msg.role === 'user' ? '#334155' : 'var(--primary-accent)', 
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '0.3rem',
-                    boxShadow: msg.role === 'bot' ? '0 0 15px rgba(59, 130, 246, 0.3)' : 'none'
-                  }}>
-                    {msg.role === 'user' ? <User size={20} color="white" /> : <Bot size={20} color="white" />}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 800, marginBottom: '0.4rem', fontSize: '0.85rem', color: msg.role === 'user' ? '#94a3b8' : 'var(--primary-accent)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      {msg.role === 'user' ? 'Citizen Request' : 'VoteWise Intelligence'}
+                    <div className={`message-avatar-box ${msg.role === 'user' ? 'user' : 'bot bot-avatar-glow'}`}>
+                      {msg.role === 'user' ? <User size={20} color="white" /> : <Bot size={20} color="white" />}
                     </div>
+                    <div className="message-content-area">
+                      <div className={`message-sender-label ${msg.role === 'user' ? 'user' : 'bot'}`}>
+                        {msg.role === 'user' ? 'Citizen Request' : 'VoteWise Intelligence'}
+                      </div>
                     {msg.role === 'user' ? (
-                      <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: '#f1f5f9', whiteSpace: 'pre-wrap', fontWeight: 500 }}>{msg.text}</div>
+                      <div className="message-text-body pre-wrap">{msg.text}</div>
                     ) : (
-                      <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: '#f1f5f9', fontWeight: 500 }} className="markdown-body">
-                        <ReactMarkdown
-                          components={{
-                            p: ({node, ...props}) => <p style={{ margin: '0.4rem 0' }} {...props} />,
-                            strong: ({node, ...props}) => <strong style={{ color: '#93c5fd', fontWeight: 700 }} {...props} />,
-                            em: ({node, ...props}) => <em style={{ color: '#c4b5fd' }} {...props} />,
-                            ul: ({node, ...props}) => <ul style={{ paddingLeft: '1.4rem', margin: '0.5rem 0' }} {...props} />,
-                            ol: ({node, ...props}) => <ol style={{ paddingLeft: '1.4rem', margin: '0.5rem 0' }} {...props} />,
-                            li: ({node, ...props}) => <li style={{ marginBottom: '0.25rem' }} {...props} />,
-                            h1: ({node, ...props}) => <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#e2e8f0', margin: '0.8rem 0 0.4rem' }} {...props} />,
-                            h2: ({node, ...props}) => <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#e2e8f0', margin: '0.7rem 0 0.35rem' }} {...props} />,
-                            h3: ({node, ...props}) => <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#cbd5e1', margin: '0.6rem 0 0.3rem' }} {...props} />,
-                            a: ({node, ...props}) => <a style={{ color: '#60a5fa', textDecoration: 'underline' }} target="_blank" rel="noreferrer" {...props} />,
-                            code: ({node, inline, ...props}) => inline 
-                              ? <code style={{ background: '#1e293b', padding: '0.15rem 0.4rem', borderRadius: '4px', fontSize: '0.9em', color: '#f472b6' }} {...props} />
-                              : <pre style={{ background: '#1e293b', padding: '1rem', borderRadius: '8px', overflowX: 'auto', margin: '0.5rem 0' }}><code style={{ color: '#e2e8f0', fontSize: '0.9rem' }} {...props} /></pre>,
-                            blockquote: ({node, ...props}) => <blockquote style={{ borderLeft: '3px solid #3b82f6', paddingLeft: '0.8rem', margin: '0.5rem 0', color: '#94a3b8' }} {...props} />,
-                          }}
-                        >
-                          {msg.text}
-                        </ReactMarkdown>
+                      <div className="message-text-body markdown-body">
+                        <MarkdownErrorBoundary content={msg.text}>
+                          <ReactMarkdown className="markdown-content">
+                            {msg.text || ''}
+                          </ReactMarkdown>
+                        </MarkdownErrorBoundary>
                       </div>
                     )}
                     
                     {msg.role === 'bot' && (
-                      <div style={{ display: 'flex', gap: '1.2rem', marginTop: '1.2rem' }}>
-                        <button onClick={() => speakText(msg.text, i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#3b82f6'} onMouseLeave={e => e.currentTarget.style.color = '#475569'}>
+                      <div className="message-actions">
+                        <button onClick={() => speakText(msg.text, i)} className="action-btn-small">
                           {isSpeaking === i ? <VolumeX size={18} /> : <Volume2 size={18} />}
                         </button>
-                        <button onClick={() => copyToClipboard(msg.text)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#3b82f6'} onMouseLeave={e => e.currentTarget.style.color = '#475569'}>
+                        <button onClick={() => copyToClipboard(msg.text)} className="action-btn-small">
                           <Copy size={18} />
                         </button>
                       </div>
@@ -576,13 +543,13 @@ const FullChatbot = () => {
                 </motion.div>
               ))}
               {loading && (
-                <div style={{ display: 'flex', gap: '1.8rem', marginBottom: '2.5rem' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'var(--primary-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="message-row loading">
+                  <div className="message-avatar-box bot bot-avatar-primary">
                     <Bot size={20} color="white" />
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#1e293b', padding: '0.8rem 1.2rem', borderRadius: '16px' }}>
-                    {[1,2,3].map(i => <motion.div key={i} animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: i*0.1 }} style={{ width: '6px', height: '6px', background: 'var(--primary-accent)', borderRadius: '50%' }} />)}
-                    <span style={{ fontSize: '0.85rem', color: '#94a3b8', marginLeft: '0.5rem', fontWeight: 600 }}>{t.analyzeData}</span>
+                  <div className="loading-indicator-box">
+                    {[1,2,3].map(i => <motion.div key={i} animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: i*0.1 }} className="loading-circle" />)}
+                    <span className="loading-text">{t.analyzeData}</span>
                   </div>
                 </div>
               )}
@@ -592,13 +559,9 @@ const FullChatbot = () => {
         </div>
 
         {/* Input Footer Area - VoteWise Pill Style */}
-        <div style={{ width: '100%', maxWidth: '850px', margin: '0 auto', padding: '0 clamp(0.8rem,3vw,1.5rem) clamp(1rem,3vw,2.5rem)' }}>
-          <div style={{ 
-            background: '#1e293b', borderRadius: '24px', padding: '0.6rem 1.2rem',
-            display: 'flex', alignItems: 'center', gap: '1rem',
-            border: '1px solid #334155', boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
-          }}>
-            <motion.button whileHover={{ background: '#334155' }} style={{ padding: '0.5rem', borderRadius: '12px', background: 'transparent', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>
+        <div className="chat-input-section">
+          <div className="chat-input-pill">
+            <motion.button whileHover={{ background: '#334155' }} className="input-action-btn">
               <Plus size={22} />
             </motion.button>
             
@@ -607,18 +570,14 @@ const FullChatbot = () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                 placeholder={loading ? t.analyzeData : t.askAnything}
-                style={{
-                  flex: 1, padding: '0.8rem 0', background: 'transparent', border: 'none', outline: 'none',
-                  fontSize: 'clamp(0.95rem,2.5vw,1.1rem)', color: 'white', resize: 'none', height: '48px', fontFamily: 'inherit',
-                  fontWeight: 500, minWidth: 0
-                }}
+                className="chat-input-textarea"
             />
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <div className="input-controls">
               <motion.button
                 onClick={toggleListening}
                 whileHover={{ scale: 1.1, color: '#3b82f6' }}
-                style={{ padding: '0.5rem', background: 'transparent', border: 'none', cursor: 'pointer', color: isListening ? '#ef4444' : '#94a3b8' }}
+                className={`voice-input-btn ${isListening ? 'listening' : ''}`}
               >
                 {isListening ? <MicOff size={22} /> : <Mic size={22} />}
               </motion.button>
@@ -628,20 +587,14 @@ const FullChatbot = () => {
                 whileTap={input.trim() ? { scale: 0.9 } : {}}
                 onClick={() => handleSend()}
                 disabled={!input.trim()}
-                style={{ 
-                  width: '40px', height: '40px', borderRadius: '12px', 
-                  background: input.trim() ? '#3b82f6' : '#334155', 
-                  color: 'white',
-                  border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: input.trim() ? '0 0 15px rgba(59, 130, 246, 0.4)' : 'none'
-                }}
+                className={`send-btn ${input.trim() ? 'active' : ''}`}
               >
                 <Send size={20} />
               </motion.button>
             </div>
           </div>
-          <div style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.75rem', color: '#475569', fontWeight: 500 }}>
-            VoteWise AI is an educational assistant. Verify critical details with the <a href="https://eci.gov.in" target="_blank" rel="noreferrer" style={{ color: '#3b82f6', textDecoration: 'none' }}>Election Commission of India</a>.
+          <div className="chat-disclaimer">
+            VoteWise AI is an educational assistant. Verify critical details with the <a href="https://eci.gov.in" target="_blank" rel="noreferrer">Election Commission of India</a>.
           </div>
         </div>
       </div>

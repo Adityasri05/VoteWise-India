@@ -10,15 +10,15 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f1f5f9' }}>
+    <div className="admin-layout">
       {/* Sidebar */}
-      <div style={{ width: '260px', background: 'var(--primary)', color: 'white', padding: '2rem 1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '3rem', padding: '0 1rem' }}>
+      <div className="admin-sidebar">
+        <div className="admin-sidebar-header">
           <LayoutDashboard size={28} />
-          <h3 style={{ color: 'white', margin: 0 }}>Admin Portal</h3>
+          <h3>Admin Portal</h3>
         </div>
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <div className="admin-sidebar-nav">
           {[
             { icon: <BarChart3 size={20} />, label: 'Analytics' },
             { icon: <Users size={20} />, label: 'Voter Data' },
@@ -27,69 +27,66 @@ const AdminDashboard = () => {
             { icon: <MessageSquare size={20} />, label: 'Chat Logs' },
             { icon: <Settings size={20} />, label: 'Settings' }
           ].map((item, i) => (
-            <div key={i} style={{ 
-              display: 'flex', alignItems: 'center', gap: '1rem', 
-              padding: '0.8rem 1rem', borderRadius: '10px', 
-              cursor: 'pointer', transition: 'background 0.2s',
-              background: i === 0 ? 'rgba(255,255,255,0.1)' : 'transparent'
-            }}>
+            <div key={i} className={`admin-nav-item ${i === 0 ? 'active' : ''}`}>
               {item.icon}
-              <span style={{ fontWeight: 500 }}>{item.label}</span>
+              <span>{item.label}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Main Content */}
-      <div style={{ flex: 1, padding: '2rem 3rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-          <h2 style={{ margin: 0 }}>Dashboard Overview</h2>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <button className="btn" style={{ background: 'white' }}>Download Reports</button>
-            <button className="btn btn-primary">Publish Alert</button>
+      <div className="admin-main">
+        <div className="admin-main-header">
+          <h2>Dashboard Overview</h2>
+          <div className="btn-group">
+            <button className="btn admin-btn-secondary">Reports</button>
+            <button className="btn btn-primary">Publish</button>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
+        <div className="stats-grid">
           {stats.map((stat, i) => (
-            <div key={i} className="card" style={{ padding: '1.5rem', margin: 0 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                <div style={{ padding: '0.5rem', borderRadius: '10px', background: '#f8fafc' }}>{stat.icon}</div>
-                <span style={{ fontSize: '0.8rem', color: stat.change.startsWith('+') ? 'var(--success)' : 'var(--error)', fontWeight: 700 }}>{stat.change}</span>
+            <div key={i} className="card stat-card">
+              <div className="stat-card-header">
+                <div className="stat-icon-bg">{stat.icon}</div>
+                <span className={`stat-change-indicator ${stat.change.startsWith('+') ? 'positive' : 'negative'}`}>
+                  {stat.change}
+                </span>
               </div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '0.2rem' }}>{stat.value}</div>
-              <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{stat.label}</div>
+              <div className="stat-main-value">{stat.value}</div>
+              <div className="stat-main-label">{stat.label}</div>
             </div>
           ))}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
-          <div className="card" style={{ padding: '2rem', margin: 0 }}>
-            <h3 style={{ marginBottom: '1.5rem' }}>Recent AI Inquiries</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="admin-cards-grid">
+          <div className="card stat-card">
+            <h3 className="admin-card-title">Recent AI Inquiries</h3>
+            <div className="inquiry-list">
               {[
                 { q: "How to apply for voter ID online?", t: "2 mins ago" },
                 { q: "Where is my booth in Sector 45?", t: "15 mins ago" },
                 { q: "Can I vote without EPIC card?", t: "1 hour ago" }
               ].map((item, i) => (
-                <div key={i} style={{ padding: '1rem', background: '#f8fafc', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: 500 }}>"{item.q}"</span>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item.t}</span>
+                <div key={i} className="inquiry-item">
+                  <span>"{item.q}"</span>
+                  <span>{item.t}</span>
                 </div>
               ))}
             </div>
           </div>
           
-          <div className="card" style={{ padding: '2rem', margin: 0 }}>
-            <h3 style={{ marginBottom: '1.5rem' }}>Election Alerts</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ borderLeft: '4px solid var(--accent)', paddingLeft: '1rem' }}>
-                <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Nomination Deadline</div>
-                <p style={{ margin: 0, fontSize: '0.85rem', opacity: 0.7 }}>2 days remaining for candidates.</p>
+          <div className="card stat-card">
+            <h3 className="admin-card-title">Election Alerts</h3>
+            <div className="alert-list">
+              <div className="alert-item accent">
+                <div className="alert-item-title">Nomination Deadline</div>
+                <p className="alert-item-desc">2 days remaining for candidates.</p>
               </div>
-              <div style={{ borderLeft: '4px solid var(--success)', paddingLeft: '1rem' }}>
-                <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>Voter List Updated</div>
-                <p style={{ margin: 0, fontSize: '0.85rem', opacity: 0.7 }}>New electoral rolls published.</p>
+              <div className="alert-item success">
+                <div className="alert-item-title">Voter List Updated</div>
+                <p className="alert-item-desc">New electoral rolls published.</p>
               </div>
             </div>
           </div>

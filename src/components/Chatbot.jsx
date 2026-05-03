@@ -110,20 +110,14 @@ const Chatbot = () => {
   };
 
   return (
-    <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 2000 }}>
+    <div className="floating-chatbot-root">
       <AnimatePresence>
         {!isOpen && (
-          <motion.div style={{ position: 'relative' }}>
+          <motion.div className="floating-trigger-wrapper">
             <motion.div
               initial={{ opacity: 0, scale: 0.5, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              style={{
-                position: 'absolute', bottom: '90px', right: 0,
-                background: 'white', padding: '1rem 1.5rem', borderRadius: '20px',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.1)', whiteSpace: 'nowrap',
-                fontWeight: 700, border: '1px solid var(--border)', display: 'flex', gap: '0.8rem', alignItems: 'center',
-                pointerEvents: 'none'
-              }}
+              className="floating-tooltip"
             >
               <Sparkles size={18} color="var(--primary-accent)" />
               AI Assistant Ready
@@ -131,13 +125,8 @@ const Chatbot = () => {
             <motion.button
               whileHover={{ scale: 1.1, rotate: 5 }}
               whileTap={{ scale: 0.9 }}
-              className="btn btn-primary"
+              className="btn btn-primary floating-trigger-btn"
               onClick={() => setIsOpen(true)}
-              style={{ 
-                width: '70px', height: '70px', borderRadius: '24px', 
-                padding: 0, justifyContent: 'center',
-                boxShadow: '0 20px 40px rgba(59, 130, 246, 0.4)'
-              }}
             >
               <MessageSquare size={30} />
             </motion.button>
@@ -151,78 +140,51 @@ const Chatbot = () => {
             initial={{ opacity: 0, y: 50, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.95 }}
-            style={{
-              width: 'min(420px, 90vw)', height: 'min(650px, 80vh)',
-              background: 'white',
-              borderRadius: '28px',
-              boxShadow: '0 30px 60px rgba(0,0,0,0.2)',
-              border: '1px solid var(--border)',
-              display: 'flex', flexDirection: 'column',
-              overflow: 'hidden'
-            }}
+            className="floating-chat-window"
           >
             {/* Header */}
-            <div style={{ 
-              padding: '1.2rem 1.5rem', 
-              background: 'var(--primary)', 
-              color: 'white',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                <div style={{ background: 'var(--primary-accent)', padding: '0.5rem', borderRadius: '12px' }}>
+            <div className="floating-chat-header">
+              <div className="chat-header-identity">
+                <div className="bot-icon-wrapper">
                   <Bot size={20} color="white" />
                 </div>
                 <div>
-                  <h4 style={{ color: 'white', margin: 0, fontSize: '1rem' }}>VoteWise AI</h4>
-                  <span style={{ fontSize: '0.7rem', opacity: 0.7 }}>Powered by Gemini 2.5 Flash Lite</span>
+                  <h4 className="chat-header-title">VoteWise AI</h4>
+                  <span className="chat-header-subtitle">Powered by Gemini 2.5 Flash Lite</span>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div className="chat-header-actions">
                 <button 
                   onClick={() => setLanguage(l => l === 'English' ? 'Hindi' : 'English')}
-                  style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.75rem', cursor: 'pointer' }}
+                  className="lang-toggle-btn"
                 >
                   {language}
                 </button>
-                <button onClick={() => setIsOpen(false)} style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer' }}>
+                <button onClick={() => setIsOpen(false)} className="close-chat-btn">
                   <X size={20} />
                 </button>
               </div>
             </div>
 
             {/* Chat Area */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+            <div className="floating-messages-area">
               {messages.map((msg, i) => (
-                <div key={i} style={{ alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
+                <div key={i} className={`message-wrapper ${msg.role === 'user' ? 'user' : 'bot'}`}>
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    style={{
-                      padding: '1rem 1.2rem',
-                      borderRadius: '20px',
-                      background: msg.role === 'user' ? 'var(--primary-accent)' : '#f1f5f9',
-                      color: msg.role === 'user' ? 'white' : 'var(--text)',
-                      fontSize: '0.95rem',
-                      boxShadow: msg.role === 'user' ? '0 4px 12px rgba(59, 130, 246, 0.2)' : 'none',
-                      whiteSpace: 'pre-wrap'
-                    }}
+                    className={`message-bubble ${msg.role === 'user' ? 'user-bubble' : 'bot-bubble'}`}
                   >
                     {msg.text}
                   </motion.div>
                   
                   {msg.suggestions && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.8rem' }}>
+                    <div className="chat-suggestions-container">
                       {msg.suggestions.map((s, si) => (
                         <button
                           key={si}
                           onClick={() => handleSuggestion(s)}
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: '0.4rem',
-                            padding: '0.5rem 0.8rem', borderRadius: '12px',
-                            background: 'white', border: '1px solid var(--primary-accent)',
-                            color: 'var(--primary-accent)', fontSize: '0.8rem', fontWeight: 600,
-                            cursor: 'pointer'
-                          }}
+                          className="chat-suggestion-chip"
                         >
                           {s.icon} {s.label}
                         </button>
@@ -232,26 +194,26 @@ const Chatbot = () => {
                 </div>
               ))}
               {loading && (
-                <div style={{ alignSelf: 'flex-start', background: '#f1f5f9', padding: '0.8rem 1.2rem', borderRadius: '18px', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <div className="chat-typing-indicator">
                   <Loader2 size={16} className="animate-spin" color="var(--primary-accent)" />
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Assistant is typing...</span>
+                  <span className="typing-text">Assistant is typing...</span>
                 </div>
               )}
               <div ref={messagesEndRef} />
             </div>
 
-            {/* API Key Warning if placeholder is present */}
+            {/* API Key Warning */}
             {window.location.hostname === 'localhost' && import.meta.env.VITE_GEMINI_API_KEY === undefined && (
-               <div style={{ padding: '0.5rem 1rem', background: '#fef2f2', borderTop: '1px solid #fee2e2', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', color: '#dc2626' }}>
+               <div className="api-warning-banner">
                  <AlertCircle size={14} />
                  <span>Set <b>VITE_GEMINI_API_KEY</b> in .env for AI responses.</span>
                </div>
             )}
 
             {/* Input */}
-            <div style={{ padding: '1.2rem', background: '#f8fafc', borderTop: '1px solid var(--border)' }}>
-              <div style={{ display: 'flex', gap: '0.8rem' }}>
-                <div style={{ flex: 1, position: 'relative' }}>
+            <div className="floating-input-footer">
+              <div className="floating-input-row">
+                <div className="chat-input-wrapper">
                   <input
                     ref={inputRef}
                     type="text"
@@ -259,19 +221,11 @@ const Chatbot = () => {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                     placeholder={language === 'English' ? "Type a message..." : "संदेश लिखें..."}
-                    style={{
-                      width: '100%', padding: '0.8rem 1rem', paddingRight: '2.5rem',
-                      borderRadius: '14px', border: '1px solid var(--border)',
-                      fontSize: '0.95rem', outline: 'none'
-                    }}
+                    className="floating-chat-input"
                   />
                   <button 
                     onClick={toggleListening}
-                    style={{ 
-                      position: 'absolute', right: '0.8rem', top: '50%', transform: 'translateY(-50%)',
-                      background: 'none', border: 'none', cursor: 'pointer',
-                      color: isListening ? 'var(--error)' : 'var(--text-muted)'
-                    }}
+                    className={`mic-toggle-btn ${isListening ? 'active' : ''}`}
                   >
                     {isListening ? <MicOff size={18} /> : <Mic size={18} />}
                   </button>
@@ -279,11 +233,7 @@ const Chatbot = () => {
                 <button
                   onClick={() => handleSend()}
                   disabled={!input.trim()}
-                  style={{ 
-                    width: '45px', height: '45px', borderRadius: '14px', 
-                    background: input.trim() ? 'var(--primary-accent)' : '#cbd5e1', color: 'white',
-                    border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                  }}
+                  className={`chat-send-btn ${input.trim() ? 'enabled' : 'disabled'}`}
                 >
                   <Send size={20} />
                 </button>

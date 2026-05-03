@@ -43,41 +43,34 @@ const VoterProcess = () => {
   ];
 
   return (
-    <div style={{ padding: '6rem 1rem', maxWidth: '1100px', margin: '0 auto' }}>
+    <div className="help-center-container">
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-        <div style={{ textAlign: 'center', marginBottom: '6rem' }}>
+        <div className="process-header-center">
           <h1 className="section-title">The Voter Journey</h1>
-          <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', maxWidth: '700px', margin: '0 auto' }}>
+          <p className="process-subtitle">
             A comprehensive, digital-first guide to becoming an active participant in Indian democracy.
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '3rem' }}>
+        <div className="process-grid">
           {steps.map((step, i) => (
             <motion.div 
               key={i} 
-              className="card" 
+              className="card voter-step-card" 
+              style={{ '--card-color': step.color }}
               whileHover={{ y: -10 }}
-              style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start', padding: '3rem' }}
             >
-              <div style={{ 
-                padding: '1.2rem', 
-                background: `${step.color}15`, 
-                borderRadius: '24px',
-                color: step.color,
-                border: `1px solid ${step.color}30`
-              }}>
+              <div className="process-card-icon-wrapper">
                 {step.icon}
               </div>
-              <div style={{ flex: 1 }}>
-                <h3 style={{ marginBottom: '1rem', fontSize: '1.4rem' }}>{step.title}</h3>
-                <p style={{ marginBottom: '2rem', color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: '1.7' }}>{step.desc}</p>
+              <div className="process-card-content">
+                <h3 className="process-card-title">{step.title}</h3>
+                <p className="process-card-desc">{step.desc}</p>
                 <a 
                   href={step.link} 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="btn btn-primary"
-                  style={{ textDecoration: 'none', background: step.color, boxShadow: `0 10px 20px -5px ${step.color}40` }}
+                  className="btn btn-primary process-card-btn"
                 >
                   {step.linkText} <ArrowRight size={18} />
                 </a>
@@ -89,25 +82,18 @@ const VoterProcess = () => {
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
-          style={{ 
-            marginTop: '8rem', padding: '5rem', 
-            background: 'linear-gradient(135deg, var(--primary) 0%, #1e293b 100%)', 
-            color: 'white', borderRadius: '40px', textAlign: 'center',
-            position: 'relative', overflow: 'hidden',
-            boxShadow: 'var(--shadow-lg)'
-          }}
+          className="voter-hero-card"
         >
-          <div style={{ position: 'relative', zIndex: 2 }}>
-            <CreditCard size={64} color="var(--primary-accent)" style={{ marginBottom: '2rem' }} />
-            <h2 style={{ color: 'white', fontSize: '2.5rem', marginBottom: '1.5rem' }}>Voting Without a Physical ID?</h2>
-            <p style={{ opacity: 0.8, fontSize: '1.2rem', marginBottom: '3rem', maxWidth: '750px', margin: '0 auto 3rem' }}>
+          <div className="voter-hero-content">
+            <CreditCard size={64} color="var(--primary-accent)" className="voter-hero-icon" />
+            <h2 className="voter-hero-title">Voting Without a Physical ID?</h2>
+            <p className="voter-hero-text">
               Your democratic right is protected. If your name is in the electoral roll, you can present any of the 12 approved documents including Aadhaar, PAN, or Passport.
             </p>
-            <button className="btn" style={{ background: 'white', color: 'var(--primary)', padding: '1rem 3rem' }}>Explore Valid IDs</button>
+            <button className="btn voter-hero-btn">Explore Valid IDs</button>
           </div>
           
-          {/* Decorative blur */}
-          <div style={{ position: 'absolute', bottom: '-20%', left: '-10%', width: '400px', height: '400px', background: 'var(--primary-accent)', borderRadius: '50%', filter: 'blur(150px)', opacity: 0.2 }}></div>
+          <div className="voter-hero-blob"></div>
         </motion.div>
       </motion.div>
     </div>

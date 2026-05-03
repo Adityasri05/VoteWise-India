@@ -90,33 +90,16 @@ function StationMarkers({ stations, activeId, onMarkerClick, onClose }) {
           title={station.name}
           onClick={() => onMarkerClick(station.id)}
         >
-          {/* Custom styled pin */}
-          <div style={{
-            background: activeId === station.id
-              ? 'linear-gradient(135deg,#6366f1,#8b5cf6)'
-              : 'linear-gradient(135deg,#3b82f6,#1d4ed8)',
-            color: '#fff',
-            borderRadius: '50% 50% 50% 0',
-            transform: 'rotate(-45deg)',
-            width: activeId === station.id ? '44px' : '36px',
-            height: activeId === station.id ? '44px' : '36px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
-            border: '3px solid #fff',
-            transition: 'all 0.2s ease',
-            cursor: 'pointer',
-          }}>
+          <div className={`booth-marker-pin ${activeId === station.id ? 'active' : 'inactive'}`}>
             <MapPin
               size={activeId === station.id ? 18 : 15}
-              style={{ transform: 'rotate(45deg)' }}
+              className="booth-marker-icon"
             />
           </div>
+
         </AdvancedMarker>
       ))}
 
-      {/* InfoWindow for active marker */}
       {activeId && (() => {
         const s = stations.find(st => st.id === activeId);
         if (!s) return null;
@@ -126,22 +109,16 @@ function StationMarkers({ stations, activeId, onMarkerClick, onClose }) {
             onCloseClick={onClose}
             pixelOffset={[0, -50]}
           >
-            <div style={{ fontFamily: 'Inter, sans-serif', minWidth: '220px', padding: '4px' }}>
-              <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1e293b', marginBottom: '4px' }}>
-                {s.name}
-              </div>
-              <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '8px' }}>
-                {s.address}
-              </div>
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ background: '#dcfce7', color: '#166534', padding: '2px 8px', borderRadius: '100px', fontSize: '0.72rem', fontWeight: 700 }}>
-                  {s.distance}
-                </span>
+            <div className="booth-infowindow-container">
+              <div className="booth-infowindow-title">{s.name}</div>
+              <div className="booth-infowindow-address">{s.address}</div>
+              <div className="booth-infowindow-meta">
+                <span className="booth-distance-tag">{s.distance}</span>
                 <a
                   href={`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ fontSize: '0.75rem', color: '#3b82f6', fontWeight: 600, textDecoration: 'none' }}
+                  className="booth-directions-link"
                 >
                   Get Directions →
                 </a>
@@ -229,26 +206,24 @@ const BoothLocator = () => {
         }));
         setMapCenter({ lat, lng });
         setStations(generatedStations);
-        setSearch('Current Location');
-        setGeolocating(false);
         setHasSearched(true);
-        setGeocodeQuery(null);
+        setGeolocating(false);
       },
       () => {
-        setError('Unable to retrieve your location. Please allow location access.');
+        setError('Unable to retrieve your location.');
         setGeolocating(false);
       }
     );
   };
 
-  const noApiKey = !MAPS_API_KEY || MAPS_API_KEY === 'YOUR_GOOGLE_MAPS_API_KEY_HERE';
+  const noApiKey = !MAPS_API_KEY;
 
   return (
-    <div style={{ padding: '6rem 1rem 4rem', maxWidth: '1300px', margin: '0 auto' }}>
+    <div className="help-center-container">
       {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+      <div className="section-header-center">
         <h1 className="section-title">Polling Station Locator</h1>
-        <p style={{ fontSize: '1.15rem', color: 'var(--text-muted)', maxWidth: '620px', margin: '0 auto' }}>
+        <p className="section-description">
           Find your designated polling booth instantly. Enter your locality, area name, or EPIC number to see nearby stations on the map.
         </p>
       </div>
@@ -258,27 +233,18 @@ const BoothLocator = () => {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{
-            background: 'linear-gradient(135deg, #fef3c7, #fffbeb)',
-            border: '1px solid #fcd34d',
-            borderRadius: '16px',
-            padding: '1.2rem 1.8rem',
-            marginBottom: '2.5rem',
-            display: 'flex',
-            gap: '1rem',
-            alignItems: 'flex-start',
-          }}
+          className="api-key-warning"
         >
-          <AlertCircle size={20} color="#d97706" style={{ marginTop: '2px', flexShrink: 0 }} />
+          <AlertCircle size={20} className="api-key-warning-icon" />
           <div>
-            <strong style={{ color: '#92400e', fontSize: '0.95rem' }}>Google Maps API Key Required</strong>
-            <p style={{ color: '#b45309', fontSize: '0.85rem', margin: '4px 0 0' }}>
+            <strong className="api-key-warning-title">Google Maps API Key Required</strong>
+            <p className="api-key-warning-text">
               Add your Maps JavaScript API key as <code>VITE_GOOGLE_MAPS_API_KEY</code> in <code>.env</code>.{' '}
               <a
                 href="https://developers.google.com/maps/documentation/javascript/get-api-key?utm_source=gmp-code-assist"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: '#d97706', fontWeight: 600 }}
+                className="api-key-warning-link"
               >
                 Get a key →
               </a>
@@ -287,152 +253,59 @@ const BoothLocator = () => {
         </motion.div>
       )}
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'minmax(300px, 380px) 1fr',
-        gap: '2.5rem',
-        alignItems: 'start',
-      }}>
+      <div className="booth-layout">
         {/* ── Left Panel: Search ── */}
-        <div className="card" style={{ padding: '2.5rem', position: 'sticky', top: '120px' }}>
-          <h3 style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.8rem', fontSize: '1.1rem' }}>
+        <div className="card booth-search-panel">
+          <h3 className="booth-search-header">
             <Compass size={20} color="var(--primary-accent)" /> Search Your Booth
           </h3>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+          <div className="flex-column-gap-md">
             {/* Search input */}
-            <div style={{ position: 'relative' }}>
+            <div className="booth-input-wrapper">
               <input
                 ref={inputRef}
                 type="text"
                 id="booth-search-input"
+                className="form-input"
                 placeholder="Enter locality, area or EPIC no."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={handleKeyDown}
-                style={{
-                  width: '100%',
-                  padding: '1rem 3rem 1rem 1.2rem',
-                  borderRadius: '14px',
-                  border: '1.5px solid var(--border)',
-                  background: '#f8fafc',
-                  fontSize: '0.95rem',
-                  outline: 'none',
-                  transition: 'border 0.2s, box-shadow 0.2s',
-                  boxSizing: 'border-box',
-                }}
-                onFocus={e => {
-                  e.target.style.border = '1.5px solid var(--primary-accent)';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(59,130,246,0.1)';
-                }}
-                onBlur={e => {
-                  e.target.style.border = '1.5px solid var(--border)';
-                  e.target.style.boxShadow = 'none';
-                }}
               />
               <Search
                 size={16}
-                style={{ position: 'absolute', right: '1.2rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.3 }}
+                className="booth-search-icon"
               />
             </div>
 
             {/* Find button */}
             <button
               id="booth-find-btn"
-              className="btn btn-primary"
+              className="btn btn-primary w-full justify-center"
               onClick={handleSearch}
               disabled={loading || !search.trim()}
-              style={{ padding: '1rem', justifyContent: 'center' }}
             >
-              {loading ? (
-                <>
-                  <span style={{
-                    display: 'inline-block',
-                    width: '16px', height: '16px',
-                    border: '2px solid rgba(255,255,255,0.3)',
-                    borderTopColor: '#fff',
-                    borderRadius: '50%',
-                    animation: 'spin 0.7s linear infinite',
-                  }} />
-                  Locating Booths…
-                </>
-              ) : (
-                <><MapPin size={16} /> Find Polling Stations</>
-              )}
+              {loading ? 'Locating...' : <><MapPin size={16} /> Find Stations</>}
             </button>
 
             {/* Divider */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-              <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
+            <div className="booth-divider">
+              <div className="booth-divider-line" />
               or
-              <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
+              <div className="booth-divider-line" />
             </div>
 
             {/* Use My Location button */}
             <button
               id="booth-location-btn"
-              className="btn"
+              className="btn btn-secondary w-full justify-center"
               onClick={handleUseLocation}
               disabled={geolocating}
-              style={{
-                padding: '0.9rem',
-                justifyContent: 'center',
-                background: 'rgba(99, 102, 241, 0.08)',
-                border: '1.5px solid rgba(99, 102, 241, 0.2)',
-                color: '#6366f1',
-                borderRadius: '14px',
-                fontWeight: 600,
-                fontSize: '0.9rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.6rem',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
             >
               <LocateFixed size={16} />
               {geolocating ? 'Locating…' : 'Use My Location'}
             </button>
-          </div>
-
-          {/* Error */}
-          <AnimatePresence>
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                style={{
-                  marginTop: '1.5rem',
-                  background: '#fef2f2',
-                  border: '1px solid #fecaca',
-                  borderRadius: '12px',
-                  padding: '1rem 1.2rem',
-                  display: 'flex',
-                  gap: '0.7rem',
-                  alignItems: 'flex-start',
-                }}
-              >
-                <AlertCircle size={16} color="#ef4444" style={{ marginTop: '2px', flexShrink: 0 }} />
-                <p style={{ fontSize: '0.83rem', color: '#b91c1c', margin: 0 }}>{error}</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Info tip */}
-          <div style={{
-            marginTop: '2rem',
-            padding: '1.2rem',
-            background: 'rgba(59,130,246,0.05)',
-            borderRadius: '14px',
-            border: '1px solid rgba(59,130,246,0.1)',
-          }}>
-            <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'flex-start' }}>
-              <Info size={16} color="var(--primary-accent)" style={{ marginTop: '2px', flexShrink: 0 }} />
-              <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>
-                Your polling booth is assigned based on the address in the official electoral roll. Click any marker on the map to view booth details.
-              </p>
-            </div>
           </div>
 
           {/* Station list (results) */}
@@ -441,51 +314,29 @@ const BoothLocator = () => {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}
+                className="booth-station-list"
               >
-                <p style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+                <p className="booth-results-count">
                   {stations.length} Stations Found
                 </p>
                 {stations.map((s) => (
-                  <motion.button
+                  <button
                     key={s.id}
-                    whileHover={{ x: 4 }}
                     onClick={() => setActiveStationId(activeStationId === s.id ? null : s.id)}
-                    style={{
-                      display: 'flex',
-                      gap: '1rem',
-                      alignItems: 'flex-start',
-                      background: activeStationId === s.id
-                        ? 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.05))'
-                        : '#f8fafc',
-                      border: activeStationId === s.id
-                        ? '1.5px solid rgba(99,102,241,0.3)'
-                        : '1.5px solid var(--border)',
-                      borderRadius: '14px',
-                      padding: '1rem 1.2rem',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'all 0.2s',
-                    }}
+                    className={`station-result-card ${activeStationId === s.id ? 'active' : ''}`}
                   >
-                    <div style={{
-                      width: '32px', height: '32px', borderRadius: '8px',
-                      background: activeStationId === s.id
-                        ? 'linear-gradient(135deg,#6366f1,#8b5cf6)'
-                        : 'linear-gradient(135deg,#3b82f6,#1d4ed8)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                    }}>
+                    <div className="booth-station-icon-box">
                       <MapPin size={15} color="#fff" />
                     </div>
                     <div>
-                      <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1e293b', marginBottom: '2px' }}>
+                      <div className="booth-station-name">
                         {s.name}
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      <div className="booth-station-meta">
                         Booth {s.boothNo} · {s.distance}
                       </div>
                     </div>
-                  </motion.button>
+                  </button>
                 ))}
               </motion.div>
             )}
@@ -493,16 +344,9 @@ const BoothLocator = () => {
         </div>
 
         {/* ── Right Panel: Map ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div className="booth-map-panel">
           {/* Map container */}
-          <div style={{
-            borderRadius: '28px',
-            overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.12)',
-            border: '1px solid var(--border)',
-            height: '520px',
-            position: 'relative',
-          }}>
+          <div className="booth-map-container">
             <APIProvider
               apiKey={MAPS_API_KEY}
               solutionChannel="gmp_mcp_codeassist_v0.1_github"
@@ -513,9 +357,9 @@ const BoothLocator = () => {
                 defaultZoom={hasSearched ? 14 : 5}
                 gestureHandling="greedy"
                 disableDefaultUI={false}
-                style={{ width: '100%', height: '100%' }}
+                className="booth-map-canvas"
               >
-                {/* Geocode trigger */}
+
                 {geocodeQuery && (
                   <GeocoderComponent
                     query={geocodeQuery}
@@ -523,11 +367,7 @@ const BoothLocator = () => {
                     onError={handleGeocodeError}
                   />
                 )}
-
-                {/* Pan map to result */}
                 {stations.length > 0 && <MapPanner center={mapCenter} />}
-
-                {/* Station markers */}
                 {stations.length > 0 && (
                   <StationMarkers
                     stations={stations}
@@ -539,26 +379,16 @@ const BoothLocator = () => {
               </Map>
             </APIProvider>
 
-            {/* Empty state overlay */}
             {!hasSearched && (
-              <div style={{
-                position: 'absolute',
-                inset: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'rgba(248,250,252,0.75)',
-                backdropFilter: 'blur(6px)',
-                pointerEvents: 'none',
-              }}>
-                <Globe size={56} style={{ opacity: 0.15, marginBottom: '1rem' }} />
-                <p style={{ color: 'var(--text-muted)', fontSize: '1rem', fontWeight: 500 }}>
+              <div className="booth-map-empty-overlay">
+                <Globe size={56} className="booth-map-overlay-icon" />
+                <p className="booth-map-overlay-text">
                   Search to see polling stations on the map
                 </p>
               </div>
             )}
           </div>
+
 
           {/* Station detail cards (shown after search) */}
           <AnimatePresence mode="wait">
@@ -568,60 +398,43 @@ const BoothLocator = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}
+                className="booth-station-list"
               >
+                <p className="booth-results-count">Found {stations.length} Polling Stations Near You</p>
                 {stations.map((s, i) => (
                   <motion.div
                     key={s.id}
-                    className="card"
+                    className={`card booth-detail-card ${activeStationId === s.id ? 'active' : ''}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.1 }}
-                    whileHover={{ y: -3 }}
-                    style={{
-                      padding: '1.8rem 2rem',
-                      borderLeft: `5px solid ${activeStationId === s.id ? '#6366f1' : 'var(--primary-accent)'}`,
-                      cursor: 'pointer',
-                      outline: activeStationId === s.id ? '2px solid rgba(99,102,241,0.2)' : 'none',
-                      transition: 'all 0.2s',
-                    }}
                     onClick={() => setActiveStationId(prev => prev === s.id ? null : s.id)}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.8rem' }}>
+                    <div className="booth-detail-card-header">
                       <div>
-                        <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>{s.name}</h3>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.83rem', margin: '4px 0 0' }}>
+                        <h3 className="booth-detail-card-title">{s.name}</h3>
+                        <p className="booth-detail-card-subtitle">
                           Booth No: <strong>{s.boothNo}</strong>
                         </p>
                       </div>
-                      <span style={{
-                        background: '#dcfce7', color: '#166534',
-                        padding: '0.35rem 0.9rem', borderRadius: '100px',
-                        fontSize: '0.78rem', fontWeight: 800, flexShrink: 0,
-                      }}>
+                      <span className="booth-detail-card-badge">
                         {s.distance}
                       </span>
                     </div>
 
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: '0 0 1.2rem' }}>
-                      <MapPin size={13} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+                    <p className="booth-detail-card-address">
+                      <MapPin size={13} />
                       {s.address}
                     </p>
 
-                    <div style={{
-                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                      paddingTop: '1.2rem', borderTop: '1px solid var(--border)',
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                        <div style={{
-                          background: '#f1f5f9', padding: '0.5rem',
-                          borderRadius: '10px', display: 'flex', alignItems: 'center',
-                        }}>
-                          <Phone size={16} color="#64748b" />
+                    <div className="booth-detail-card-footer">
+                      <div className="booth-detail-card-contact">
+                        <div className="booth-contact-icon-box">
+                          <Phone size={16} color="var(--text-muted)" />
                         </div>
                         <div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>BLO: {s.blo}</div>
-                          <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{s.bloPhone}</div>
+                          <div className="booth-contact-label">BLO: {s.blo}</div>
+                          <div className="booth-contact-value">{s.bloPhone}</div>
                         </div>
                       </div>
 
@@ -630,13 +443,10 @@ const BoothLocator = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        style={{ textDecoration: 'none' }}
+                        className="text-decoration-none"
                       >
-                        <button
-                          className="btn btn-primary"
-                          style={{ padding: '0.7rem 1.3rem', fontSize: '0.83rem', gap: '0.5rem' }}
-                        >
-                          <Navigation size={14} /> Get Directions
+                        <button className="btn btn-primary booth-directions-btn">
+                          <Navigation size={14} /> Directions
                         </button>
                       </a>
                     </div>
@@ -648,22 +458,13 @@ const BoothLocator = () => {
         </div>
       </div>
 
-      {/* Spinner keyframe */}
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @media (max-width: 768px) {
-          .booth-grid { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
-
       {/* Attribution */}
-      <p style={{
-        textAlign: 'center', marginTop: '3rem',
-        fontSize: '0.72rem', color: 'var(--text-muted)', opacity: 0.6,
-      }}>
+      <p className="booth-attribution">
         Map data ©{new Date().getFullYear()} Google · Polling data is illustrative for demo purposes
       </p>
+
     </div>
+
   );
 };
 

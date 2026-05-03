@@ -75,37 +75,36 @@ const Quiz = () => {
   };
 
   return (
-    <div style={{ padding: '6rem 1rem', maxWidth: '800px', margin: '0 auto', minHeight: '80vh' }}>
+    <div className="quiz-container">
       <AnimatePresence mode="wait">
         {showScore ? (
           <motion.div 
             key="score"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="card" 
-            style={{ textAlign: 'center', padding: '5rem 3rem', background: 'linear-gradient(135deg, var(--primary) 0%, #1e293b 100%)', color: 'white' }}
+            className="card score-card" 
           >
-            <Trophy size={80} color="var(--accent)" style={{ marginBottom: '2rem' }} />
-            <h1 style={{ color: 'white', fontSize: '3rem', marginBottom: '1rem' }}>Certification Complete!</h1>
-            <p style={{ fontSize: '1.2rem', opacity: 0.8, marginBottom: '3rem' }}>
-              You scored <span style={{ color: 'var(--accent)', fontWeight: 900, fontSize: '2rem' }}>{score}</span> out of {questions.length}
+            <Trophy size={80} color="var(--accent)" />
+            <h1>Certification Complete!</h1>
+            <p className="score-summary">
+              You scored <span>{score}</span> out of {questions.length}
             </p>
             
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', marginBottom: '4rem' }}>
+            <div className="score-badge-container">
               {score >= 3 ? (
-                <div style={{ background: 'rgba(255,255,255,0.1)', padding: '2rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.2)' }}>
+                <div className="score-badge">
                   <Award size={40} color="var(--accent)" />
-                  <h4 style={{ color: 'white', marginTop: '1rem' }}>Civic Scholar</h4>
+                  <h4>Civic Scholar</h4>
                 </div>
               ) : (
-                <div style={{ background: 'rgba(255,255,255,0.1)', padding: '2rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.2)' }}>
+                <div className="score-badge">
                   <HelpCircle size={40} color="#60a5fa" />
-                  <h4 style={{ color: 'white', marginTop: '1rem' }}>Active Learner</h4>
+                  <h4>Active Learner</h4>
                 </div>
               )}
             </div>
 
-            <button className="btn btn-primary" onClick={resetQuiz} style={{ background: 'white', color: 'var(--primary)', padding: '1rem 3rem' }}>
+            <button className="btn quiz-reset-btn" onClick={resetQuiz}>
               <RotateCcw size={20} /> Retake Quiz
             </button>
           </motion.div>
@@ -115,52 +114,37 @@ const Quiz = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="card" 
-            style={{ padding: '4rem' }}
+            className="card quiz-card" 
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
-              <span style={{ fontWeight: 800, color: 'var(--primary-accent)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            <div className="quiz-header">
+              <span className="quiz-step-text">
                 Question {currentQuestion + 1} of {questions.length}
               </span>
-              <div style={{ width: '150px', height: '6px', background: '#f1f5f9', borderRadius: '3px', overflow: 'hidden' }}>
+              <div className="quiz-progress-container">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
-                  style={{ height: '100%', background: 'var(--primary-accent)' }}
+                  className="quiz-progress-bar"
                 />
               </div>
             </div>
 
-            <h2 style={{ fontSize: '1.8rem', marginBottom: '3rem', lineHeight: '1.4' }}>{questions[currentQuestion].questionText}</h2>
+            <h2 className="quiz-question-text">{questions[currentQuestion].questionText}</h2>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="quiz-options-list">
               {questions[currentQuestion].answerOptions.map((option, index) => (
                 <motion.button
                   key={index}
-                  whileHover={{ x: 10 }}
+                  whileHover={selectedAnswer === null ? { x: 10 } : {}}
                   onClick={() => handleAnswerClick(index, option.isCorrect)}
-                  style={{
-                    padding: '1.5rem 2rem',
-                    borderRadius: '20px',
-                    border: '1px solid var(--border)',
-                    background: selectedAnswer === index 
-                      ? (option.isCorrect ? '#d1fae5' : '#fee2e2')
-                      : 'white',
-                    color: 'var(--text)',
-                    fontSize: '1.1rem',
-                    fontWeight: 600,
-                    textAlign: 'left',
-                    cursor: selectedAnswer === null ? 'pointer' : 'default',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    transition: 'all 0.2s',
-                    borderColor: selectedAnswer === index 
-                      ? (option.isCorrect ? '#10b981' : '#ef4444')
-                      : 'var(--border)'
-                  }}
+                  className={`quiz-option-button ${
+                    selectedAnswer === index 
+                      ? (option.isCorrect ? 'correct' : 'incorrect') 
+                      : ''
+                  }`}
+                  disabled={selectedAnswer !== null}
                 >
-                  {option.answerText}
+                  <span>{option.answerText}</span>
                   {selectedAnswer === index && (
                     option.isCorrect ? <CheckCircle2 color="#10b981" /> : <XCircle color="#ef4444" />
                   )}
