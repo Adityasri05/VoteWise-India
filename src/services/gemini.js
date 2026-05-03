@@ -1,9 +1,24 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { sanitizeInput, createRateLimiter } from "../utils/sanitize";
 
-// Use environment variable from Vite
+/**
+ * Gemini AI service module for VoteWise chatbot.
+ * Handles all communication with the Google Generative AI API.
+ * @module services/gemini
+ */
+
+/** @type {string} API key sourced from environment variables */
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "YOUR_GEMINI_API_KEY";
 const genAI = new GoogleGenerativeAI(API_KEY);
 
+/** Rate limiter: max 1 API call per second to prevent abuse */
+const rateLimiter = createRateLimiter(1000);
+
+/**
+ * System instruction templates for different assistant modes.
+ * Each mode tailors the AI personality and scope for better UX.
+ * @type {Object<string, function(string): string>}
+ */
 const ASSISTANT_MODES = {
   'voter-education': (language) => `You are VoteWise AI — Voter Education Specialist for Indian citizens.
       Your primary role is to educate citizens about the complete voting process in India.
@@ -31,12 +46,31 @@ const ASSISTANT_MODES = {
       Avoid political bias. Focus on educating voters about the process (EVM, VVPAT, Form 6, Voter ID, etc.)`
 };
 
+/**
+ * Generates a chat response from the Gemini AI model.
+ * Includes input sanitization, rate limiting, and graceful fallback.
+ *
+ * @param {string} prompt - The user's message text.
+ * @param {Array} history - Previous chat history for context.
+ * @param {string} [language='English'] - The language for the response.
+ * @param {string} [assistantMode='default'] - The assistant personality mode.
+ * @returns {Promise<string>} The AI-generated response text.
+ * @throws {Error} Returns a user-friendly fallback on any failure.
+ */
 export const generateChatResponse = async (prompt, history = [], language = 'English', assistantMode = 'default') => {
   try {
-    // If key is still placeholder, use fallback immediately to avoid API error noise
+    // Validate API key presence
     if (API_KEY === "YOUR_GEMINI_API_KEY") {
       throw new Error("Missing API Key");
     }
+
+    // Rate limiting check
+    if (!rateLimiter.canProceed()) {
+      return "Please wait a moment before sending another message. I'm processing your previous request.";
+    }
+
+    // Sanitize user input before sending to API
+    const sanitizedPrompt = sanitizeInput(prompt);
 
     const getSystemInstruction = ASSISTANT_MODES[assistantMode] || ASSISTANT_MODES['default'];
 
@@ -52,7 +86,7 @@ export const generateChatResponse = async (prompt, history = [], language = 'Eng
       },
     });
 
-    const result = await chat.sendMessage(prompt);
+    const result = await chat.sendMessage(sanitizedPrompt);
     const response = await result.response;
     return response.text();
   } catch (error) {
