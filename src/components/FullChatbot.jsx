@@ -280,6 +280,8 @@ const FullChatbot = () => {
                 whileHover={{ background: '#1e293b' }} 
                 onClick={() => setIsSidebarOpen(false)}
                 className="sidebar-close-btn"
+                role="button"
+                aria-label="Close sidebar"
               >
                 <PanelLeftClose size={20} color="#94a3b8" />
               </motion.div>
@@ -347,6 +349,7 @@ const FullChatbot = () => {
                     whileHover={{ color: '#ef4444' }}
                     onClick={(e) => clearHistory(e)}
                     className="clear-history-btn"
+                    aria-label="Clear history"
                   >
                     <Trash2 size={12} /> Clear
                   </motion.button>
@@ -367,6 +370,8 @@ const FullChatbot = () => {
                       onClick={(e) => deleteHistoryItem(e, item.id)}
                       whileHover={{ color: '#ef4444', scale: 1.2 }}
                       className="delete-history-btn"
+                      role="button"
+                      aria-label="Delete history item"
                     >
                       <Trash2 size={12} />
                     </motion.div>
@@ -409,6 +414,8 @@ const FullChatbot = () => {
                 whileHover={{ background: '#1e293b' }} 
                 onClick={() => setIsSidebarOpen(true)}
                 className="sidebar-toggle-btn"
+                role="button"
+                aria-label="Open sidebar"
               >
                 <PanelLeftOpen size={20} color="#94a3b8" />
               </motion.div>
@@ -430,6 +437,7 @@ const FullChatbot = () => {
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/')}
               className="hub-btn"
+              aria-label="Return to Hub"
             >
               <Trophy size={14} /> {t.dashboard || 'Election Hub'}
             </motion.button>
@@ -438,6 +446,8 @@ const FullChatbot = () => {
                 whileHover={{ background: '#1e293b' }}
                 onClick={() => setShowLanguages(!showLanguages)}
                 className={`lang-trigger ${showLanguages ? 'active' : ''}`}
+                role="button"
+                aria-label="Toggle Languages"
               >
                 <Languages size={18} color={showLanguages ? 'var(--primary-accent)' : '#94a3b8'} />
               </motion.div>
@@ -531,10 +541,10 @@ const FullChatbot = () => {
                     
                     {msg.role === 'bot' && (
                       <div className="message-actions">
-                        <button onClick={() => speakText(msg.text, i)} className="action-btn-small">
+                        <button onClick={() => speakText(msg.text, i)} className="action-btn-small" aria-label="Speak text">
                           {isSpeaking === i ? <VolumeX size={18} /> : <Volume2 size={18} />}
                         </button>
-                        <button onClick={() => copyToClipboard(msg.text)} className="action-btn-small">
+                        <button onClick={() => copyToClipboard(msg.text)} className="action-btn-small" aria-label="Copy text">
                           <Copy size={18} />
                         </button>
                       </div>
@@ -561,7 +571,7 @@ const FullChatbot = () => {
         {/* Input Footer Area - VoteWise Pill Style */}
         <div className="chat-input-section">
           <div className="chat-input-pill">
-            <motion.button whileHover={{ background: '#334155' }} className="input-action-btn">
+            <motion.button whileHover={{ background: '#334155' }} className="input-action-btn" aria-label="More actions">
               <Plus size={22} />
             </motion.button>
             
@@ -578,6 +588,7 @@ const FullChatbot = () => {
                 onClick={toggleListening}
                 whileHover={{ scale: 1.1, color: '#3b82f6' }}
                 className={`voice-input-btn ${isListening ? 'listening' : ''}`}
+                aria-label={isListening ? "Stop listening" : "Start listening"}
               >
                 {isListening ? <MicOff size={22} /> : <Mic size={22} />}
               </motion.button>
@@ -588,13 +599,14 @@ const FullChatbot = () => {
                 onClick={() => handleSend()}
                 disabled={!input.trim()}
                 className={`send-btn ${input.trim() ? 'active' : ''}`}
+                aria-label="Send message"
               >
                 <Send size={20} />
               </motion.button>
             </div>
           </div>
           <div className="chat-disclaimer">
-            VoteWise AI is an educational assistant. Verify critical details with the <a href="https://eci.gov.in" target="_blank" rel="noreferrer">Election Commission of India</a>.
+            VoteWise AI is an educational assistant. Verify critical details with the <a href="https://eci.gov.in" target="_blank" rel="noopener noreferrer">Election Commission of India</a>.
           </div>
         </div>
       </div>

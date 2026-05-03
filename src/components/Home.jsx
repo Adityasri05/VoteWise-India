@@ -1,12 +1,11 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Sparkles, ChevronRight, Fingerprint, ShieldCheck, Globe, Trophy, Award, Star, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import Timeline from './Timeline';
 
 const Home = () => {
-  const navigate = useNavigate();
   const { t } = useLanguage();
   const journeySteps = [
     { icon: <Fingerprint />, title: t.eligibility, desc: 'Secure verification of your voting rights.', path: '/process', color: '#3b82f6' },

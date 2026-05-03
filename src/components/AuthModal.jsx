@@ -138,7 +138,7 @@ const AuthModal = ({ isOpen, onClose }) => {
 
             {/* Right Form Side */}
             <div className="premium-auth-right">
-              <button onClick={onClose} className="premium-auth-close">
+              <button onClick={onClose} className="premium-auth-close" aria-label="Close modal">
                 <X size={24} />
               </button>
 

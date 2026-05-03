@@ -127,6 +127,7 @@ const Chatbot = () => {
               whileTap={{ scale: 0.9 }}
               className="btn btn-primary floating-trigger-btn"
               onClick={() => setIsOpen(true)}
+              aria-label="Open AI Assistant"
             >
               <MessageSquare size={30} />
             </motion.button>
@@ -157,10 +158,11 @@ const Chatbot = () => {
                 <button 
                   onClick={() => setLanguage(l => l === 'English' ? 'Hindi' : 'English')}
                   className="lang-toggle-btn"
+                  aria-label="Toggle Language"
                 >
                   {language}
                 </button>
-                <button onClick={() => setIsOpen(false)} className="close-chat-btn">
+                <button onClick={() => setIsOpen(false)} className="close-chat-btn" aria-label="Close Chat">
                   <X size={20} />
                 </button>
               </div>
@@ -226,6 +228,7 @@ const Chatbot = () => {
                   <button 
                     onClick={toggleListening}
                     className={`mic-toggle-btn ${isListening ? 'active' : ''}`}
+                    aria-label={isListening ? "Stop listening" : "Start listening"}
                   >
                     {isListening ? <MicOff size={18} /> : <Mic size={18} />}
                   </button>
@@ -234,6 +237,7 @@ const Chatbot = () => {
                   onClick={() => handleSend()}
                   disabled={!input.trim()}
                   className={`chat-send-btn ${input.trim() ? 'enabled' : 'disabled'}`}
+                  aria-label="Send message"
                 >
                   <Send size={20} />
                 </button>
