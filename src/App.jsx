@@ -79,44 +79,56 @@ function App() {
       <a href="#main-content" className="skip-link">Skip to main content</a>
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
-      {/* Mobile Menu Drawer */}
+      {/* Mobile Side Panel Drawer */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, x: '100%' }}
+            initial={{ opacity: 0, x: '-100%' }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-            transition={{ type: 'tween', duration: 0.3 }}
+            exit={{ opacity: 0, x: '-100%' }}
+            transition={{ type: 'tween', duration: 0.28 }}
             className="mobile-drawer"
             role="dialog"
             aria-modal="true"
             aria-label="Mobile navigation menu"
           >
-            <button
-              onClick={() => setMobileMenuOpen(false)}
-              className="mobile-drawer-close"
-              aria-label="Close menu"
-            >
-              <X size={20} />
-            </button>
+            {/* Drawer Header */}
+            <div className="mobile-drawer-header">
+              <div className="mobile-drawer-logo">
+                <div className="nav-logo-icon" style={{ width: 36, height: 36 }}>
+                  <Vote size={22} color="white" />
+                </div>
+                <span className="mobile-drawer-brand">VoteWise<span style={{ color: 'var(--primary-accent)' }}>.in</span></span>
+              </div>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="mobile-drawer-close"
+                aria-label="Close menu"
+              >
+                <X size={20} />
+              </button>
+            </div>
 
-            <nav aria-label="Mobile navigation" style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginTop: '2rem' }}>
+            {/* Nav Section */}
+            <div className="mobile-drawer-section-label">Navigation</div>
+            <nav aria-label="Mobile navigation" className="mobile-drawer-nav">
               {sidePanelLinks.map(link => (
                 <Link
                   key={link.to}
                   to={link.to}
                   onClick={() => setMobileMenuOpen(false)}
                   className={`mobile-nav-link ${location.pathname === link.to ? 'active' : ''}`}
-                  style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.8rem 1.2rem', borderRadius: '12px', textDecoration: 'none', color: location.pathname === link.to ? 'var(--primary-accent)' : 'var(--text)', background: location.pathname === link.to ? 'rgba(59, 130, 246, 0.1)' : 'transparent', fontWeight: location.pathname === link.to ? '600' : '500' }}
                 >
-                  {link.icon}
-                  {link.label}
+                  <span className="mobile-nav-icon">{link.icon}</span>
+                  <span className="mobile-nav-label">{link.label}</span>
+                  {location.pathname === link.to && <ChevronRight size={16} className="mobile-nav-chevron" />}
                 </Link>
               ))}
             </nav>
 
+            {/* Bottom Actions */}
             <div className="mobile-actions">
-              {/* Language picker */}
+              <div className="mobile-drawer-section-label">Language</div>
               <div className="mobile-lang-list" role="radiogroup" aria-label="Language selection">
                 {languages.map(l => (
                   <div
@@ -133,8 +145,7 @@ function App() {
                 ))}
               </div>
               <button
-                className="btn btn-primary"
-                style={{ width: '100%', justifyContent: 'center' }}
+                className="btn btn-primary mobile-auth-btn"
                 onClick={() => { setMobileMenuOpen(false); user ? handleLogout() : setIsAuthModalOpen(true); }}
                 aria-label={user ? 'Sign out' : 'Sign in'}
               >
