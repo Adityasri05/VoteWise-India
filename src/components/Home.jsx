@@ -50,12 +50,16 @@ const Home = () => {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.6 }}
             className="hero-btn-group"
+            style={{ justifyContent: 'center' }}
           >
             <Link to="/process" className="btn btn-primary hero-cta-btn">
               {t.beginJourney} <ChevronRight size={20} />
             </Link>
             <Link to="/booth" className="hero-btn-outline">
               {t.locateStations}
+            </Link>
+            <Link to="/admin" className="hero-btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: 'var(--primary-accent)', color: 'var(--primary-accent)' }}>
+              <ShieldCheck size={18} /> Staff Portal
             </Link>
           </motion.div>
         </div>
