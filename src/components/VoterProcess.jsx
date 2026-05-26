@@ -1,8 +1,9 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { CheckCircle2, Download, UserPlus, Search, Edit3, CreditCard, ChevronRight, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle2, Download, UserPlus, Search, Edit3, CreditCard, ChevronRight, ArrowRight, X } from 'lucide-react';
 
 const VoterProcess = () => {
+  const [showDocsModal, setShowDocsModal] = useState(false);
   const steps = [
     {
       id: 'eligibility',
@@ -90,12 +91,47 @@ const VoterProcess = () => {
             <p className="voter-hero-text">
               Your democratic right is protected. If your name is in the electoral roll, you can present any of the 12 approved documents including Aadhaar, PAN, or Passport.
             </p>
-            <button className="btn voter-hero-btn">Explore Valid IDs</button>
+            <button className="btn voter-hero-btn" onClick={() => setShowDocsModal(true)}>Explore Valid IDs</button>
           </div>
           
           <div className="voter-hero-blob"></div>
         </motion.div>
       </motion.div>
+
+      <AnimatePresence>
+        {showDocsModal && (
+          <div className="drawer-overlay" onClick={() => setShowDocsModal(false)} style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="card"
+              style={{ background: 'white', padding: '2rem', maxWidth: '500px', width: '90%', borderRadius: '16px', position: 'relative' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button onClick={() => setShowDocsModal(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+                <X size={24} color="var(--text-muted)" />
+              </button>
+              <h2 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>Valid ID Documents</h2>
+              <p style={{ marginBottom: '1.5rem', color: 'var(--text-muted)' }}>If you don't have your Voter ID card, you can show any of these 12 approved documents:</p>
+              <ul style={{ paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', color: 'var(--text)' }}>
+                <li>Aadhaar Card</li>
+                <li>MGNREGA Job Card</li>
+                <li>Passbooks with photograph issued by Bank/Post Office</li>
+                <li>Health Insurance Smart Card issued under the scheme of Ministry of Labour</li>
+                <li>Driving License</li>
+                <li>PAN Card</li>
+                <li>Smart Card issued by RGI under NPR</li>
+                <li>Indian Passport</li>
+                <li>Pension document with photograph</li>
+                <li>Service Identity Cards with photograph issued to employees by Central/State Govt/PSUs/Public Limited Companies</li>
+                <li>Official identity cards issued to MPs/MLAs/MLCs</li>
+                <li>Unique Disability ID (UDID) Card</li>
+              </ul>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Vote, UserCheck, MapPin, MessageSquare, ShieldCheck, Trophy, Info, ChevronRight, CheckCircle2, AlertTriangle, HelpCircle, Star, Award, LayoutDashboard, LogIn, User, Sparkles, Fingerprint, Globe, Bell, Languages, X, Menu } from 'lucide-react';
+import { Vote, UserCheck, MapPin, MessageSquare, ShieldCheck, Trophy, Info, ChevronRight, CheckCircle2, AlertTriangle, HelpCircle, Star, Award, LayoutDashboard, LogIn, User, Users, Settings, Sparkles, Fingerprint, Globe, Bell, Languages, X, Menu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AuthModal from './components/AuthModal';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -55,13 +55,23 @@ function App() {
     try { await signOut(auth); } catch (error) { console.error("Logout failed:", error); }
   };
 
-  /** @type {Array<{to: string, label: string}>} Navigation link configuration */
   const navLinks = [
     { to: '/', label: t.dashboard },
     { to: '/process', label: t.journey },
     { to: '/booth', label: t.stations },
     { to: '/candidates', label: t.candidates },
     { to: '/ai-assistant', label: t.aiAssistant },
+  ];
+
+  const sidePanelLinks = [
+    { to: '/', label: t.dashboard || 'Dashboard', icon: <LayoutDashboard size={20} /> },
+    { to: '/process', label: t.journey || 'Voter Journey', icon: <UserCheck size={20} /> },
+    { to: '/booth', label: t.stations || 'Polling Stations', icon: <MapPin size={20} /> },
+    { to: '/candidates', label: t.candidates || 'AI Profiles', icon: <Users size={20} /> },
+    { to: '/ai-assistant', label: t.aiAssistant || 'AI Assistant', icon: <MessageSquare size={20} /> },
+    { to: '/quiz', label: 'Certification', icon: <Trophy size={20} /> },
+    { to: '/help', label: 'Help Center', icon: <HelpCircle size={20} /> },
+    { to: '/admin', label: 'Admin Portal', icon: <Settings size={20} /> },
   ];
 
   return (
@@ -90,14 +100,16 @@ function App() {
               <X size={20} />
             </button>
 
-            <nav aria-label="Mobile navigation">
-              {navLinks.map(link => (
+            <nav aria-label="Mobile navigation" style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginTop: '2rem' }}>
+              {sidePanelLinks.map(link => (
                 <Link
                   key={link.to}
                   to={link.to}
                   onClick={() => setMobileMenuOpen(false)}
                   className={`mobile-nav-link ${location.pathname === link.to ? 'active' : ''}`}
+                  style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.8rem 1.2rem', borderRadius: '12px', textDecoration: 'none', color: location.pathname === link.to ? 'var(--primary-accent)' : 'var(--text)', background: location.pathname === link.to ? 'rgba(59, 130, 246, 0.1)' : 'transparent', fontWeight: location.pathname === link.to ? '600' : '500' }}
                 >
+                  {link.icon}
                   {link.label}
                 </Link>
               ))}

@@ -3618,7 +3618,22 @@ img {
 }
 
 /* Mobile Adjustments for Booth Locator */
+.booth-error-msg {
+  color: #ef4444;
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 @media (max-width: 1024px) {
+  .mobile-hidden {
+    display: none !important;
+  }
   .booth-layout {
     grid-template-columns: 1fr;
   }

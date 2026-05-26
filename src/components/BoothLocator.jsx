@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   APIProvider,
   Map,
-  AdvancedMarker,
+  Marker,
   InfoWindow,
   useMap,
   useMapsLibrary,
@@ -52,29 +52,76 @@ const MOCK_STATIONS = [
   },
 ];
 
-// ─── Geocoder hook helper ─────────────────────────────────────────────────────
-function GeocoderComponent({ query, onResult, onError }) {
+// ─── Distance Calculation Helper ──────────────────────────────────────────────
+function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  return (R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)))).toFixed(1);
+}
+
+// ─── Location Services Hook Helper ───────────────────────────────────────────
+function LocationServicesComponent({ request, onResult, onError }) {
   const geocodingLib = useMapsLibrary('geocoding');
+  const placesLib = useMapsLibrary('places');
+  const map = useMap();
 
   useEffect(() => {
-    if (!geocodingLib || !query) return;
+    if (!geocodingLib || !placesLib || !map || !request) return;
+
     const geocoder = new geocodingLib.Geocoder();
-    geocoder.geocode(
-      { address: query + ', India', region: 'IN' },
-      (results, status) => {
+    const placesService = new placesLib.PlacesService(map);
+
+    const processLocation = (lat, lng, formattedAddress) => {
+      placesService.nearbySearch(
+        { location: { lat, lng }, radius: 2000, type: 'school' },
+        (results, status) => {
+          if (status === placesLib.PlacesServiceStatus.OK && results) {
+            const stations = results.slice(0, 5).map((place, i) => {
+              const pLat = place.geometry.location.lat();
+              const pLng = place.geometry.location.lng();
+              return {
+                id: place.place_id || i,
+                name: place.name,
+                address: place.vicinity || formattedAddress,
+                lat: pLat,
+                lng: pLng,
+                distance: getDistance(lat, lng, pLat, pLng) + ' km',
+                blo: 'Assigned Officer',
+                bloPhone: '1950',
+                boothNo: 'B-' + Math.floor(Math.random() * 900 + 100),
+              };
+            });
+            onResult({ lat, lng, formattedAddress, stations });
+          } else {
+            onError('Could not find nearby polling stations.');
+          }
+        }
+      );
+    };
+
+    if (request.type === 'address') {
+      geocoder.geocode({ address: request.query + ', India', region: 'IN' }, (results, status) => {
         if (status === 'OK' && results[0]) {
           const loc = results[0].geometry.location;
-          onResult({
-            lat: loc.lat(),
-            lng: loc.lng(),
-            formattedAddress: results[0].formatted_address,
-          });
+          processLocation(loc.lat(), loc.lng(), results[0].formatted_address);
         } else {
-          onError('Location not found. Please try a more specific address.');
+          onError(`Location not found (${status}).`);
         }
-      }
-    );
-  }, [geocodingLib, query]);
+      });
+    } else if (request.type === 'gps') {
+      geocoder.geocode({ location: { lat: request.lat, lng: request.lng } }, (results, status) => {
+        let address = 'Your Location';
+        if (status === 'OK' && results[0]) {
+          address = results[0].formatted_address;
+        }
+        processLocation(request.lat, request.lng, address);
+      });
+    }
+  }, [geocodingLib, placesLib, map, request]);
 
   return null;
 }
@@ -84,20 +131,12 @@ function StationMarkers({ stations, activeId, onMarkerClick, onClose }) {
   return (
     <>
       {stations.map((station) => (
-        <AdvancedMarker
+        <Marker
           key={station.id}
           position={{ lat: station.lat, lng: station.lng }}
           title={station.name}
           onClick={() => onMarkerClick(station.id)}
-        >
-          <div className={`booth-marker-pin ${activeId === station.id ? 'active' : 'inactive'}`}>
-            <MapPin
-              size={activeId === station.id ? 18 : 15}
-              className="booth-marker-icon"
-            />
-          </div>
-
-        </AdvancedMarker>
+        />
       ))}
 
       {activeId && (() => {
@@ -145,15 +184,25 @@ function MapPanner({ center }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 const BoothLocator = () => {
+  const defaultLat = 28.6139;
+  const defaultLng = 77.2090;
+  
+  const initialStations = MOCK_STATIONS.map((s) => ({
+    ...s,
+    lat: defaultLat + s.offsetLat,
+    lng: defaultLng + s.offsetLng,
+    address: 'Connaught Place, New Delhi' + s.addressSuffix,
+  }));
+
   const [search, setSearch] = useState('');
-  const [geocodeQuery, setGeocodeQuery] = useState(null);
+  const [locationRequest, setLocationRequest] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [mapCenter, setMapCenter] = useState({ lat: 20.5937, lng: 78.9629 }); // India center
-  const [stations, setStations] = useState([]);
+  const [mapCenter, setMapCenter] = useState({ lat: defaultLat, lng: defaultLng }); // Default to New Delhi
+  const [stations, setStations] = useState(initialStations);
   const [activeStationId, setActiveStationId] = useState(null);
   const [error, setError] = useState('');
   const [geolocating, setGeolocating] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
+  const [hasSearched, setHasSearched] = useState(true); // Default to true so zoom is correct and stations show
   const inputRef = useRef(null);
 
   const handleSearch = useCallback(() => {
@@ -163,28 +212,24 @@ const BoothLocator = () => {
     setStations([]);
     setActiveStationId(null);
     setHasSearched(true);
-    setGeocodeQuery(search.trim());
+    setLocationRequest({ type: 'address', query: search.trim() });
   }, [search]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') handleSearch();
   };
 
-  const handleGeocodeResult = useCallback(({ lat, lng, formattedAddress }) => {
-    const generatedStations = MOCK_STATIONS.map((s) => ({
-      ...s,
-      lat: lat + s.offsetLat,
-      lng: lng + s.offsetLng,
-      address: formattedAddress.split(',').slice(0, 2).join(',') + s.addressSuffix,
-    }));
+  const handleLocationResult = useCallback(({ lat, lng, stations }) => {
     setMapCenter({ lat, lng });
-    setStations(generatedStations);
+    setStations(stations);
     setLoading(false);
+    setGeolocating(false);
   }, []);
 
-  const handleGeocodeError = useCallback((msg) => {
+  const handleLocationError = useCallback((msg) => {
     setError(msg);
     setLoading(false);
+    setGeolocating(false);
   }, []);
 
   const handleUseLocation = () => {
@@ -196,23 +241,14 @@ const BoothLocator = () => {
     setError('');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        const generatedStations = MOCK_STATIONS.map((s) => ({
-          ...s,
-          lat: lat + s.offsetLat,
-          lng: lng + s.offsetLng,
-          address: 'Your Location' + s.addressSuffix,
-        }));
-        setMapCenter({ lat, lng });
-        setStations(generatedStations);
+        setLocationRequest({ type: 'gps', lat: pos.coords.latitude, lng: pos.coords.longitude });
         setHasSearched(true);
-        setGeolocating(false);
       },
       () => {
-        setError('Unable to retrieve your location.');
+        setError('Unable to retrieve your location. Please check browser permissions.');
         setGeolocating(false);
-      }
+      },
+      { timeout: 10000 }
     );
   };
 
@@ -306,6 +342,13 @@ const BoothLocator = () => {
               <LocateFixed size={16} />
               {geolocating ? 'Locating…' : 'Use My Location'}
             </button>
+            
+            {/* Error Message */}
+            {error && (
+              <div className="booth-error-msg">
+                <AlertCircle size={16} /> {error}
+              </div>
+            )}
           </div>
 
           {/* Station list (results) */}
@@ -314,7 +357,7 @@ const BoothLocator = () => {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="booth-station-list"
+                className="booth-station-list mobile-hidden"
               >
                 <p className="booth-results-count">
                   {stations.length} Stations Found
@@ -335,6 +378,16 @@ const BoothLocator = () => {
                       <div className="booth-station-meta">
                         Booth {s.boothNo} · {s.distance}
                       </div>
+                      <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="booth-directions-link"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--primary-accent)', fontWeight: '600', textDecoration: 'none' }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Navigation size={14} /> Get Directions
+                      </a>
                     </div>
                   </button>
                 ))}
@@ -349,24 +402,22 @@ const BoothLocator = () => {
           <div className="booth-map-container">
             <APIProvider
               apiKey={MAPS_API_KEY}
-              solutionChannel="gmp_mcp_codeassist_v0.1_github"
             >
+              {locationRequest && (
+                <LocationServicesComponent
+                  request={locationRequest}
+                  onResult={handleLocationResult}
+                  onError={handleLocationError}
+                />
+              )}
               <Map
-                mapId="DEMO_MAP_ID"
                 defaultCenter={mapCenter}
                 defaultZoom={hasSearched ? 14 : 5}
                 gestureHandling="greedy"
                 disableDefaultUI={false}
                 className="booth-map-canvas"
+                style={{ width: '100%', height: '100%' }}
               >
-
-                {geocodeQuery && (
-                  <GeocoderComponent
-                    query={geocodeQuery}
-                    onResult={handleGeocodeResult}
-                    onError={handleGeocodeError}
-                  />
-                )}
                 {stations.length > 0 && <MapPanner center={mapCenter} />}
                 {stations.length > 0 && (
                   <StationMarkers

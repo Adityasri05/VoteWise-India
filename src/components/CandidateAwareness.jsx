@@ -13,7 +13,8 @@ const CandidateAwareness = () => {
       assets: '₹5.2 Crores',
       criminalCases: 0,
       manifesto: 'Focus on digital infrastructure and education reform.',
-      color: '#3b82f6'
+      color: '#3b82f6',
+      age: 34
     },
     { 
       name: 'Vikram Singh', 
@@ -22,7 +23,8 @@ const CandidateAwareness = () => {
       assets: '₹12.8 Crores',
       criminalCases: 2,
       manifesto: 'Strengthening rural economy and agricultural subsidies.',
-      color: '#ef4444'
+      color: '#ef4444',
+      age: 45
     },
     { 
       name: 'Meera Deshmukh', 
@@ -31,9 +33,19 @@ const CandidateAwareness = () => {
       assets: '₹1.5 Crores',
       criminalCases: 0,
       manifesto: 'Sustainable urban planning and renewable energy.',
-      color: '#10b981'
+      color: '#10b981',
+      age: 32
     }
   ];
+
+  const filteredCandidates = candidates.filter(c => {
+    switch (filter) {
+      case 'no criminal records': return c.criminalCases === 0;
+      case 'high assets': return parseFloat(c.assets.replace(/[^0-9.]/g, '')) > 5.0;
+      case 'youth leaders': return c.age && c.age <= 35;
+      default: return true;
+    }
+  });
 
   return (
     <div className="help-center-container">
@@ -57,7 +69,7 @@ const CandidateAwareness = () => {
       </div>
 
       <div className="candidate-grid">
-        {candidates.map((candidate, i) => (
+        {filteredCandidates.map((candidate, i) => (
           <motion.div 
             key={i} 
             className="card candidate-card" 
@@ -123,7 +135,7 @@ const CandidateAwareness = () => {
           <h2>Compare Candidates</h2>
           <p>Select two or more candidates to compare their legislative experience and financial disclosures side-by-side.</p>
         </div>
-        <button className="btn btn-primary candidate-compare-btn">Launch Comparison Tool</button>
+        <button className="btn btn-primary candidate-compare-btn" onClick={() => alert("Comparison Tool is coming soon!")}>Launch Comparison Tool</button>
       </div>
     </div>
   );
