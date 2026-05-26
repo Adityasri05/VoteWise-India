@@ -24,7 +24,9 @@
     "@vis.gl/react-google-maps": "^1.8.3",
     "firebase": "^12.12.1",
     "framer-motion": "^12.38.0",
+    "leaflet": "^1.9.4",
     "lucide-react": "^1.11.0",
+    "react-leaflet": "^5.0.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.14.2"
   }
