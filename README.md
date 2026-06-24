@@ -4,6 +4,7 @@
 
 VoteWise India is a next-generation, AI-powered web application designed to empower the modern Indian voter. Through intelligent conversational interfaces, real-time mapping, and gamified education, it simplifies the complex democratic process—from voter registration to navigating the polling booth.
 
+
 ## 🌟 Key Features
 
 - **🤖 AI Election Assistant**: Integrated with Google Gemini to answer voter queries, explain processes (EVM/VVPAT), and provide instant, accurate election information.
@@ -13,6 +14,10 @@ VoteWise India is a next-generation, AI-powered web application designed to empo
 - **🏆 Civic IQ & Certification**: Gamified learning modules and quizzes that reward users with digital badges for mastering the election process.
 - **🛡️ Truth & Clarity**: A dedicated myth-busting section to combat misinformation regarding voter privacy and EVM security.
 - **🔐 Secure User Authentication**: Backed by Firebase Authentication to ensure safe user profiles and tracking.
+
+
+
+
 
 ## 🛠️ Tech Stack
 
